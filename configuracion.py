@@ -8,7 +8,7 @@ def cargar_entorno():
         for linea in env_local.read_text(encoding="utf-8-sig").splitlines():
             nombre, separador, valor = linea.partition("=")
             if separador and nombre.strip() in {
-                "GEMINI_API_KEY", "PUBLIC_SITE_URL", "WHATSAPP_NUMBER",
+                "GEMINI_API_KEY", "GEMINI_MODEL", "PUBLIC_SITE_URL", "WHATSAPP_NUMBER",
                 "SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "SUPABASE_SECRET_KEY", "FLASK_SECRET_KEY",
             }:
                 os.environ.setdefault(nombre.strip(), valor.strip().strip("\"'"))

@@ -47,6 +47,33 @@ def cupo(ip):
         return True
 
 
+def generar_con_gemini(body, key):
+    principal = os.getenv("GEMINI_MODEL", "").strip() or "gemini-3.5-flash-lite"
+    respaldo = "gemini-3.5-flash" if principal != "gemini-3.5-flash" else "gemini-3.5-flash-lite"
+    payload = json.dumps(body).encode()
+    for intento, modelo in enumerate((principal, respaldo)):
+        url = "https://generativelanguage.googleapis.com/v1beta/models/" + quote(modelo, safe="") + ":generateContent"
+        req = Request(url, data=payload, headers={"Content-Type": "application/json", "x-goog-api-key": key})
+        try:
+            with urlopen(req, timeout=18 if intento == 0 else 20) as respuesta:
+                return json.load(respuesta)["candidates"][0]["content"]["parts"]
+        except HTTPError as error:
+            if error.code not in (502, 503, 504):
+                raise
+            with error:
+                espera = (error.headers or {}).get("Retry-After", "1")
+                current_app.logger.warning("ONCE Gemini temporal: HTTP %s, intento %s", error.code, intento + 1)
+            if intento or espera not in ("0", "1", "2", "3"):
+                break
+            sleep(max(1, int(espera)))
+        except (OSError, URLError) as error:
+            causa = error.reason if isinstance(error, URLError) else error
+            if not isinstance(causa, TimeoutError):
+                raise
+            current_app.logger.warning("ONCE Gemini: espera agotada en intento %s", intento + 1)
+    return None
+
+
 @once.post("/api/once")
 def responder():
     key = os.getenv("GEMINI_API_KEY", "").strip()
@@ -81,24 +108,10 @@ def responder():
     body = {"systemInstruction": {"parts": [{"text": guia}]}, "contents": contents,
             "generationConfig": {"temperature": 0.25, "maxOutputTokens": 1000,
                                  "responseMimeType": "application/json", "responseSchema": schema}}
-    model = os.getenv("GEMINI_MODEL") or "gemini-3.1-flash-lite"
-    req = Request("https://generativelanguage.googleapis.com/v1beta/models/" + quote(model, safe="") + ":generateContent",
-                  data=json.dumps(body).encode(), headers={"Content-Type":"application/json", "x-goog-api-key":key})
     try:
-        deadline = monotonic() + 40
-        try:
-            response = urlopen(req, timeout=40)
-        except HTTPError as temporary:
-            # Reservar tiempo para un único segundo intento dentro de la misma consulta.
-            backoff = (temporary.headers or {}).get("Retry-After", "1")
-            delay = max(1, int(backoff)) if backoff.isascii() and backoff.isdigit() and len(backoff) < 6 else None
-            if temporary.code not in (502, 503, 504) or delay is None or deadline - monotonic() - delay < 8:
-                raise
-            temporary.close()
-            sleep(delay)
-            response = urlopen(req, timeout=max(1, deadline - monotonic()))
-        with response as res:
-            parts = json.load(res)["candidates"][0]["content"]["parts"]
+        parts = generar_con_gemini(body, key)
+        if parts is None:
+            return jsonify(modo="guia", aviso="Gemini está ocupado. Puedes seguir consultando la guía.")
         parsed = json.loads("".join(p.get("text", "") for p in parts if not p.get("thought")))
         answer = parsed["respuesta"]
         if not isinstance(answer, str) or not answer.strip():

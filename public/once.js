@@ -155,6 +155,7 @@
             signal:controller.signal});
           const data=await r.json();
           if(r.ok && data.modo==='gemini' && typeof data.respuesta==='string') result=data;
+          else if(data.modo==='guia' && typeof data.aviso==='string') motivo=data.aviso;
           else if(typeof data.error==='string') motivo=data.error;
         } finally {clearTimeout(timer);}
       }

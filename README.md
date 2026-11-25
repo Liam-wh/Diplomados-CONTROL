@@ -6,7 +6,7 @@
 2. En Vercel selecciona Add New → Project e importa ese repositorio. Usa la raíz del repositorio como Root Directory. Vercel detecta Flask.
 3. Antes de desplegar, agrega GEMINI_API_KEY en Environment Variables. Pega la clave como valor y selecciona Production. Si también pruebas despliegues de Preview, configúrala en ese entorno. Obtén tu clave en [Google AI Studio](https://aistudio.google.com/apikey).
 4. Pulsa Deploy. Si agregaste la variable después, abre Deployments y selecciona Redeploy. Para tu dominio, usa Settings → Domains y sigue los registros DNS indicados.
-5. Abre la URL publicada, pulsa ONCE y envía una pregunta. La etiqueta «Con Gemini» después de la respuesta confirma una consulta real. Ante un fallo, la guía local sigue disponible y el pie del chat indica el motivo disponible. El modelo predeterminado es gemini-3.1-flash-lite. Puedes elegir otro modelo compatible con salida JSON estructurada mediante GEMINI_MODEL en Vercel.
+5. Abre la URL publicada, pulsa ONCE y envía una pregunta. La etiqueta «Con Gemini» después de la respuesta confirma una consulta real. Ante un fallo, la guía local sigue disponible y el pie del chat indica el motivo disponible. El modelo predeterminado es gemini-3.5-flash-lite. Ante saturación o tiempo de espera agotado, ONCE intenta con Gemini 3.5 Flash como respaldo de Flash-Lite dentro del tiempo disponible. Puedes elegir otro modelo compatible con salida JSON estructurada mediante GEMINI_MODEL en Vercel.
 
 ## Probar en Windows y VS Code
 
