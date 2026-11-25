@@ -33,62 +33,40 @@ matchMedia('(min-width: 768px)').addEventListener('change', () => setMenu(false)
 
 // Carrusel de diplomados en portada.
 const slides = all('[data-slide]');
-const featureName = byId('feature-name');
-const rotationButton = byId('slide-rotation');
-let slideIndex = -1;
+const hero = document.querySelector('.campaign-hero');
+const dots = all('.hero-dots button');
+let slideIndex = 0;
 let slideTimer;
-let rotationPaused = reducedMotion.matches;
 
 function scheduleSlide() {
   clearTimeout(slideTimer);
-  if (rotationButton && !rotationPaused && !document.hidden && slides.length > 1) {
-    slideTimer = setTimeout(() => moveSlide(1, false), slideIndex === -1 ? 10000 : 5000);
+  if (!reducedMotion.matches && !document.hidden && !hero.querySelector(':focus-visible')) {
+    slideTimer = setTimeout(() => showSlide(slideIndex + 1), slideIndex === 0 ? 10000 : 5000);
   }
 }
 
-function setRotation(paused) {
-  if (!rotationButton) return;
-  rotationPaused = paused;
-  const label = paused ? 'Reanudar rotación de portada' : 'Pausar rotación de portada';
-  rotationButton.setAttribute('aria-label', label);
-  rotationButton.title = label;
-  rotationButton.firstElementChild.textContent = paused ? '▶' : 'Ⅱ';
+function showSlide(index) {
+  slides[slideIndex].classList.remove('is-current');
+  dots[slideIndex].setAttribute('aria-pressed', 'false');
+  slideIndex = (index + slides.length) % slides.length;
+  slides[slideIndex].classList.add('is-current');
+  dots[slideIndex].setAttribute('aria-pressed', 'true');
   scheduleSlide();
 }
 
-function moveSlide(direction, announce = true) {
-  if (slideIndex === -1) {
-    document.querySelector('.campaign-photo').classList.add('intro-complete');
-    slideIndex = direction > 0 ? 0 : slides.length - 1;
-  } else {
-    slides[slideIndex].classList.remove('is-current');
-    slideIndex = (slideIndex + direction + slides.length) % slides.length;
-  }
-  const slide = slides[slideIndex];
-  slide.classList.add('is-current');
-  byId('feature-photo').src = slide.querySelector('img').src;
-  const card = programs.get(slide.dataset.slide);
-  featureName.dataset.open = slide.dataset.slide;
-  featureName.textContent = card.querySelector('h3').textContent;
-  featureName.classList.remove('changed');
-  requestAnimationFrame(() => featureName.classList.add('changed'));
-  byId('slide-number').textContent = String(slideIndex + 1).padStart(2, '0');
-  if (announce) {
-    byId('slide-status').textContent = (slideIndex + 1) + ' de ' + slides.length + '. ' + featureName.textContent;
-  }
-  scheduleSlide();
-}
-rotationButton?.addEventListener('click', () => setRotation(!rotationPaused));
-reducedMotion.addEventListener('change', event => setRotation(event.matches));
+dots.forEach((dot, index) => dot.addEventListener('click', () => showSlide(index)));
+hero.addEventListener('focusin', event => {
+  if (event.target.matches(':focus-visible')) clearTimeout(slideTimer);
+});
+hero.addEventListener('focusout', () => queueMicrotask(scheduleSlide));
+reducedMotion.addEventListener('change', scheduleSlide);
 document.addEventListener('visibilitychange', scheduleSlide);
-setRotation(rotationPaused);
-byId('slide-prev').addEventListener('click', () => moveSlide(-1));
-byId('slide-next').addEventListener('click', () => moveSlide(1));
-const hero = document.querySelector('.hero');
+scheduleSlide();
 hero.addEventListener('keydown', event => {
   if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
   event.preventDefault();
-  moveSlide(event.key === 'ArrowRight' ? 1 : -1);
+  showSlide(slideIndex + (event.key === 'ArrowRight' ? 1 : -1));
+  if (dots.includes(event.target)) dots[slideIndex].focus();
 });
 let swipeStart;
 hero.addEventListener('touchstart', event => {
@@ -101,7 +79,7 @@ hero.addEventListener('touchend', event => {
   const dx = end.clientX - swipeStart.clientX;
   const dy = end.clientY - swipeStart.clientY;
   swipeStart = null;
-  if (Math.abs(dx) > 60 && Math.abs(dx) > 1.5 * Math.abs(dy)) moveSlide(dx < 0 ? 1 : -1);
+  if (Math.abs(dx) > 60 && Math.abs(dx) > 1.5 * Math.abs(dy)) showSlide(slideIndex + (dx < 0 ? 1 : -1));
 }, {passive: true});
 
 // La misma selección funciona en Flask y al abrir el HTML de muestra desde el disco.

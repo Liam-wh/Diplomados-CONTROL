@@ -1,6 +1,6 @@
 <section class="hero campaign-hero" aria-labelledby="lema">
   <div class="campaign-background" aria-hidden="true">
-    <img class="campaign-photo" src="/media/panama-portada.webp" width="1536" height="1024" alt="" fetchpriority="high">
+    <img class="campaign-photo is-current" data-slide src="/media/panama-portada.webp" width="1536" height="1024" alt="" fetchpriority="high">
         {% for p, imagen in slides %}
         <div class="hero-shot shot-{{ imagen }}" data-slide="{{ p.id }}">
           <img src="/media/{{ imagen }}.webp" alt="" decoding="async">
@@ -10,7 +10,7 @@
   <div class="wrap hero-inner">
     <div class="hero-copy">
       <h1 id="lema">Internacionalízate con <img src="/media/upi-portada.png" alt="UPI"></h1>
-      <p class="campaign-subtitle">Una oportunidad para ti</p>
+      <p class="campaign-subtitle">UNA OPORTUNIDAD PARA TI</p>
       <p class="campaign-next">Tu próximo paso profesional comienza aquí.</p>
       <p class="campaign-audience">Una oportunidad exclusiva para alumnos seleccionados de Grupo ESAM.</p>
       <div class="hero-links">
@@ -18,21 +18,11 @@
         <a class="hero-brochure" href="https://drive.google.com/file/d/1Zpj767rrtTo8AqaY8-y6rluNYpFxNamg/view" target="_blank" rel="noopener">Ver folleto completo {{ ico('book') }}</a>
       </div>
     </div>
-    <div class="feature" role="region" aria-roledescription="carrusel" aria-label="Programas de portada">
-      <div class="feature-photos" aria-hidden="true">
-        <img id="feature-photo" src="/media/{{ slides[0][1] }}.webp" alt="">
-      </div>
-      <div class="feature-copy">
-        <span class="feature-label">Diplomado en portada</span>
-        <button class="feature-name" data-open="{{ slides[0][0].id }}" id="feature-name" title="Consultar por este programa">{{ slides[0][0].nombre }}</button>
-      </div>
-      <div class="slide-controls">
-        <button class="slide-btn" type="button" id="slide-rotation" aria-label="Pausar rotación de portada"><span aria-hidden="true">Ⅱ</span></button>
-        <button class="slide-btn" id="slide-prev" aria-label="Programa anterior">{{ ico('prev') }}</button>
-        <span class="slide-no" aria-hidden="true"><b id="slide-number">01</b> / {{ "%02d"|format(slides|length) }}</span>
-        <button class="slide-btn" id="slide-next" aria-label="Programa siguiente">{{ ico('next') }}</button>
-      </div>
-      <span class="sr-only" role="status" id="slide-status"></span>
+    <div class="hero-dots" role="group" aria-label="Seleccionar fondo de portada">
+      <button type="button" aria-label="Imagen de UPI" aria-pressed="true"></button>
+      {% for p, imagen in slides %}
+      <button type="button" aria-label="Programa {{ loop.index }} · {{ p.nombre }}" aria-pressed="false"></button>
+      {% endfor %}
     </div>
   </div>
 </section>
