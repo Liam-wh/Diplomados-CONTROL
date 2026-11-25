@@ -36,9 +36,9 @@
     updateArrows();
   });
 
-  const stories = [...document.querySelectorAll('.story')];
-  const toggle = document.getElementById('story-toggle');
-  const number = document.getElementById('story-count');
+  const stories = [...document.querySelectorAll('.campaign-slide')];
+  const toggle = document.getElementById('slide-rotation');
+  const number = document.getElementById('slide-count');
   let current = 0;
   let paused = motion.matches;
   let timer;
@@ -51,7 +51,7 @@
     current = (current + direction + stories.length) % stories.length;
     stories[current].hidden = false;
     number.textContent = [current + 1, stories.length].map(n => String(n).padStart(2, '0')).join(' / ');
-    if (announce) document.getElementById('story-status').textContent = stories[current].querySelector('h3').textContent;
+    if (announce) document.getElementById('slide-status').textContent = stories[current].getAttribute('aria-label');
     schedule();
   }
   function setPaused(value) {
@@ -61,9 +61,26 @@
     schedule();
   }
   toggle.addEventListener('click', () => setPaused(!paused));
-  document.getElementById('story-prev').addEventListener('click', () => show(-1, true));
-  document.getElementById('story-next').addEventListener('click', () => show(1, true));
-  document.querySelector('.story-stage').addEventListener('focusin', () => setPaused(true));
+  document.getElementById('slide-prev').addEventListener('click', () => show(-1, true));
+  document.getElementById('slide-next').addEventListener('click', () => show(1, true));
+  const campaign = document.querySelector('.campaign');
+  campaign.addEventListener('keydown', event => {
+    if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+    event.preventDefault();
+    show(event.key === 'ArrowRight' ? 1 : -1, true);
+  });
+  let touchStart;
+  campaign.addEventListener('touchstart', event => {
+    touchStart = event.touches.length === 1 ? event.touches[0] : null;
+  }, {passive: true});
+  campaign.addEventListener('touchcancel', () => { touchStart = null; });
+  campaign.addEventListener('touchend', event => {
+    if (!touchStart) return;
+    const dx = event.changedTouches[0].clientX - touchStart.clientX;
+    const dy = event.changedTouches[0].clientY - touchStart.clientY;
+    touchStart = null;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > 1.5 * Math.abs(dy)) show(dx < 0 ? 1 : -1, true);
+  }, {passive: true});
   motion.addEventListener('change', event => setPaused(event.matches));
   document.addEventListener('visibilitychange', schedule);
   setPaused(paused);

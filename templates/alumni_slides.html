@@ -1,30 +1,60 @@
-<section class="wrap alumni-stories" aria-labelledby="stories-title" aria-roledescription="carrusel">
-  <div class="catalog-head">
-    <h2 id="stories-title">Conoce el Plan Alumni</h2>
-    <div class="story-controls">
-      <span id="story-count" aria-hidden="true">01 / 03</span>
-      <button type="button" class="icon-btn" id="story-prev" aria-label="Diapositiva anterior">{{ ico('prev') }}</button>
-      <button type="button" class="icon-btn" id="story-toggle" aria-label="Pausar presentación">Ⅱ</button>
-      <button type="button" class="icon-btn" id="story-next" aria-label="Diapositiva siguiente">{{ ico('next') }}</button>
+{% macro campaign_slide(image, title, style='', first=false) %}
+<article class="campaign-slide {{ style }}" aria-label="{{ title }}" {% if not first %}hidden{% endif %}>
+  <div class="campaign-visual">
+    <img src="/media/{{ image }}.webp" alt="" {% if first %}fetchpriority="high"{% endif %}>
+  </div>
+  <div class="campaign-copy">{{ caller() }}</div>
+</article>
+{% endmacro %}
+<section class="campaign" aria-label="Plan Alumni de UPI Panamá" aria-roledescription="carrusel">
+  <div class="wrap">
+    <div class="campaign-stage" id="campaign-stage">
+      {% call campaign_slide('alumni-panama', 'Internacionalízate con UPI', 'campaign-intro', true) %}
+        <h1>Internacionalízate con <img src="/media/upi-portada.png" width="271" height="119" alt="UPI"></h1>
+        <p class="campaign-title">Una oportunidad para ti</p>
+        <p class="campaign-lead">Tu próximo paso profesional comienza aquí.</p>
+        <p>Complementa tu formación y fortalece tu perfil con una certificación de UPI Panamá, institución de educación superior que inició operaciones en 2017.</p>
+      {% endcall %}
+      {% call campaign_slide('alumni-estudiante', 'Estudia a tu ritmo') %}
+        <p class="kicker light-rule">El Plan Alumni</p>
+        <h2 class="campaign-title">Estudia a tu ritmo</h2>
+        <p>La alianza entre Grupo ESAM y UPI Panamá ofrece a alumnos seleccionados una beca del 100% para un diplomado autogestionado.</p>
+        <p>Organiza tus horarios, combina el estudio con tu trabajo y elige si deseas pagar la certificación internacional.</p>
+      {% endcall %}
+      {% call campaign_slide('alumni-certificado-muestra', 'Tu certificado internacional', 'campaign-document') %}
+        <p class="kicker light-rule">Certificación internacional</p>
+        <h2 class="campaign-title">Un respaldo para tu formación</h2>
+        <p>UPI Panamá emite el certificado con firma, sello institucional y acceso a verificación. Puedes elegir el formato digital sin apostilla o el físico con apostilla.</p>
+        <small>La imagen muestra un certificado de ejemplo.</small>
+      {% endcall %}
+      {% call campaign_slide('alumni-alianza', 'De Panamá a Bolivia', 'campaign-flags') %}
+        <p class="kicker light-rule">Legalización y apostilla</p>
+        <h2 class="campaign-title">De Panamá a Bolivia</h2>
+        <p>Si eliges el certificado físico, UPI gestiona la legalización y la apostilla en Panamá y coordina la entrega en Bolivia. Puedes verificar la apostilla en el sistema oficial.</p>
+      {% endcall %}
+      {% call campaign_slide('alumni-certificacion', 'Cuatro ventajas para tu trayectoria') %}
+        <p class="kicker light-rule">Ventajas destacadas</p>
+        <h2 class="campaign-title">Dale proyección a tu trayectoria</h2>
+        <ul class="campaign-benefits">
+          <li><strong>Diferenciación.</strong> Certifícate con una universidad de Panamá.</li>
+          <li><strong>Currículum.</strong> Acredita una formación adicional.</li>
+          <li><strong>Acompañamiento.</strong> Recibe tu documentación en Bolivia.</li>
+          <li><strong>Proyección internacional.</strong> La apostilla facilita presentar tu certificado en otros países.</li>
+        </ul>
+      {% endcall %}
     </div>
+    <div class="campaign-footer">
+      <div class="campaign-controls" aria-label="Controles de portada" role="group">
+        <button class="icon-btn" id="slide-prev" type="button" aria-label="Diapositiva anterior">{{ ico('prev') }}</button>
+        <span id="slide-count" aria-hidden="true">01 / 05</span>
+        <button class="icon-btn" id="slide-next" type="button" aria-label="Diapositiva siguiente">{{ ico('next') }}</button>
+        <button class="icon-btn" id="slide-rotation" type="button" aria-label="Pausar presentación">Ⅱ</button>
+      </div>
+      <div class="campaign-links">
+        <a class="button primary" href="#catalogo">{{ ico('grid') }} Explorar catálogo</a>
+        <a class="brochure-link" href="https://drive.google.com/file/d/1Zpj767rrtTo8AqaY8-y6rluNYpFxNamg/view" target="_blank" rel="noopener">Ver folleto completo {{ ico('book') }}</a>
+      </div>
+    </div>
+    <span id="slide-status" class="sr-only" role="status"></span>
   </div>
-  <div class="story-stage">
-    <article class="story">
-      <div><p class="kicker">Grupo ESAM × UPI Panamá</p><h3>Una alianza que amplía tu formación</h3>
-        <p>Si eres alumno seleccionado de Grupo ESAM, puedes estudiar un diplomado autogestionado con una beca del 100% sobre la formación. Puedes obtener la certificación internacional de UPI Panamá por un costo adicional.</p>
-        <a href="https://drive.google.com/file/d/1Zpj767rrtTo8AqaY8-y6rluNYpFxNamg/view" class="story-link" target="_blank" rel="noopener">Ver folleto del Plan Alumni {{ ico('next') }}</a>
-      </div><img src="/media/alumni-alianza.webp" alt="Banderas de Panamá y Bolivia" loading="lazy">
-    </article>
-    <article class="story" hidden>
-      <div><p class="kicker">Diplomado autogestionado</p><h3>Tu tiempo, tu ritmo</h3>
-        <p>Tú organizas tus horarios y avanzas de manera autónoma. Puedes estudiar cuando tengas disponibilidad y combinar el aprendizaje con tu trabajo.</p>
-      </div><img src="/media/alumni-estudiante.webp" alt="" loading="lazy">
-    </article>
-    <article class="story" hidden>
-      <div><p class="kicker">Certificación internacional</p><h3>Lleva tu formación más allá de las fronteras</h3>
-        <p>Al aprobar el diplomado, puedes acreditar tu formación con un certificado emitido por UPI Panamá. Elige entre el formato digital sin apostilla y el certificado físico con apostilla.</p>
-      </div><img src="/media/alumni-certificacion.webp" alt="Entrega de un certificado de UPI" loading="lazy">
-    </article>
-  </div>
-  <span class="sr-only" role="status" id="story-status"></span>
 </section>

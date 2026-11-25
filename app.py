@@ -2,7 +2,7 @@ import os
 import re
 from flask import Flask, abort, render_template, request, send_from_directory, url_for
 
-from catalogo_vista import AREAS, AREAS_PORTADA, CURSOS, DESTACADOS, PERFILES_CURSOS, RESTO, SLIDES
+from catalogo_vista import AREAS, AREAS_PORTADA, CURSOS, DESTACADOS, PERFILES_CURSOS, RESTO
 from inscripcion import CERTIFICACION
 from adjuntos import LIMITE_IMAGEN
 from once import TEMAS, once
@@ -40,7 +40,7 @@ def catalogo(*, completo=False, muestra=False):
         temas=TEMAS, gemini_activo=not muestra and bool(os.getenv("GEMINI_API_KEY", "").strip()),
         form_url=os.getenv("PUBLIC_SITE_URL") or ("https://diplomados.onwi.site/" if muestra else request.url_root),
         cursos=CURSOS, perfiles_cursos=PERFILES_CURSOS,
-        programas=DESTACADOS + RESTO, slides=SLIDES, areas=AREAS,
+        programas=DESTACADOS + RESTO, areas=AREAS,
         areas_portada=AREAS_PORTADA, destacados=DESTACADOS,
     )
 

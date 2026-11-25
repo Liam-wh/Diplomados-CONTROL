@@ -385,7 +385,7 @@ input:focus, textarea:focus { outline: 1px solid var(--mint); outline-offset: 0;
   .course-body p { font-size: .825rem; line-height: 1.42; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
   .card-actions { display: grid; gap: .2rem; padding-top: .6rem; }
   .card-actions .button { min-height: 44px; padding: .35rem; gap: .3rem; font-size: .8rem; }
-  .card-actions .syllabus { position: absolute; bottom: .45rem; left: .45rem; max-width: calc(50% - .9rem); padding-inline: .65rem; background: #10191ef2; color: white; border-color: #a2b8ba; }
+  #programas .card-actions .syllabus { position: absolute; bottom: .45rem; left: .45rem; max-width: calc(50% - .9rem); padding-inline: .65rem; background: #10191ef2; color: white; border-color: #a2b8ba; }
   .plan-panel { padding: 1rem; gap: 1rem; }
   .plan-intro p:not(.kicker) { font-size: .93rem; }
 }

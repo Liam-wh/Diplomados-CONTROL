@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b1015">
+  <meta name="theme-color" content="#111111">
   <meta name="description" content="Conoce los diplomados autogestionados del Plan Alumni UPI. Explora por área y recibe orientación sobre tu inscripción.">
   <title>UPI Alumni · Diplomados y cursos</title>
   <link rel="icon" type="image/png" href="/media/upi.png">
@@ -30,38 +30,7 @@
     </div>
   </header>
   <main>
-    <section class="hero campaign-hero" aria-labelledby="lema">
-      <img class="campaign-photo" src="/media/alumni-panama.webp" width="568" height="852" alt="" fetchpriority="high">
-      <div class="wrap hero-inner">
-        <div class="hero-copy">
-          <h1 id="lema">Internacionalízate con <img src="/media/upi-portada.png" alt="UPI"></h1>
-          <p class="campaign-subtitle">Una oportunidad para ti</p>
-          <p class="campaign-next">Tu próximo paso profesional comienza aquí.</p>
-          <p class="campaign-audience">Una oportunidad exclusiva para alumnos seleccionados de Grupo ESAM.</p>
-          <a class="button primary hero-cta" href="#catalogo">{{ ico('grid') }} Explorar catálogo</a>
-        </div>
-        <div class="feature" role="region" aria-roledescription="carrusel" aria-label="Programas de portada">
-      <div class="feature-photos" aria-hidden="true">
-        {% for p, imagen in slides %}
-        <div class="hero-shot shot-{{ imagen }}{% if loop.first %} is-current{% endif %}" data-slide="{{ p.id }}">
-          <img src="/media/{{ imagen }}.webp" alt="" decoding="async">
-        </div>
-        {% endfor %}
-      </div>
-          <div class="feature-copy">
-            <span class="feature-label">Diplomado en portada</span>
-            <button class="feature-name" data-open="{{ slides[0][0].id }}" id="feature-name" title="Consultar por este programa">{{ slides[0][0].nombre }}</button>
-          </div>
-          <div class="slide-controls">
-            <button class="slide-btn" type="button" id="slide-rotation" aria-label="Pausar rotación de portada"><span aria-hidden="true">Ⅱ</span></button>
-            <button class="slide-btn" id="slide-prev" aria-label="Programa anterior">{{ ico('prev') }}</button>
-            <span class="slide-no" aria-hidden="true"><b id="slide-number">01</b> / 03</span>
-            <button class="slide-btn" id="slide-next" aria-label="Programa siguiente">{{ ico('next') }}</button>
-          </div>
-          <span class="sr-only" role="status" id="slide-status"></span>
-        </div>
-      </div>
-    </section>
+    {% include 'alumni_slides.html' %}
     <section class="catalog wrap" id="catalogo" aria-labelledby="catalog-title">
       <div class="catalog-head">
         <div><p class="kicker light-rule">Catálogo académico</p><h2 id="catalog-title">Encuentra tu diplomado.</h2></div>
@@ -124,7 +93,6 @@
         </div>
       </div>
     </section>
-    {% include 'alumni_slides.html' %}
   </main>
   <footer class="footer"><div class="wrap footer-inner"><span>© 2026 · Universidad Politécnica Internacional</span><a href="#inicio">{{ ico('up') }} Volver al inicio</a></div></footer>
 
