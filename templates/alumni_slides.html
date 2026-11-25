@@ -1,58 +1,35 @@
-{% macro campaign_slide(image, title, style='', first=false) %}
-<article class="campaign-slide {{ style }}" aria-label="{{ title }}" {% if not first %}hidden{% endif %}>
-  <div class="campaign-visual" style="--campaign-image: url('/media/{{ image }}.webp')">
-    <img src="/media/{{ image }}.webp" alt="" {% if first %}fetchpriority="high"{% endif %}>
-  </div>
-  <div class="campaign-copy">
-    {{ caller() }}
-      <div class="campaign-links">
-        <a class="button primary" href="#catalogo">{{ ico('grid') }} Explorar catálogo</a>
-        <a class="brochure-link" href="https://drive.google.com/file/d/1Zpj767rrtTo8AqaY8-y6rluNYpFxNamg/view" target="_blank" rel="noopener">Ver folleto completo {{ ico('book') }}</a>
+<section class="hero campaign-hero" aria-labelledby="lema">
+  <img class="campaign-photo" src="/media/alumni-panama.webp" width="568" height="852" alt="" fetchpriority="high">
+  <div class="wrap hero-inner">
+    <div class="hero-copy">
+      <h1 id="lema">Internacionalízate con <img src="/media/upi-portada.png" alt="UPI"></h1>
+      <p class="campaign-subtitle">Una oportunidad para ti</p>
+      <p class="campaign-next">Tu próximo paso profesional comienza aquí.</p>
+      <p class="campaign-audience">Una oportunidad exclusiva para alumnos seleccionados de Grupo ESAM.</p>
+      <div class="hero-links">
+        <a class="button primary hero-cta" href="#catalogo">{{ ico('grid') }} Explorar catálogo</a>
+        <a class="hero-brochure" href="https://drive.google.com/file/d/1Zpj767rrtTo8AqaY8-y6rluNYpFxNamg/view" target="_blank" rel="noopener">Ver folleto completo {{ ico('book') }}</a>
       </div>
-  </div>
-</article>
-{% endmacro %}
-<section class="campaign" aria-label="Plan Alumni de UPI Panamá" aria-roledescription="carrusel">
-    <div class="campaign-stage" id="campaign-stage">
-      {% call campaign_slide('alumni-panama', 'Internacionalízate con UPI', 'campaign-intro', true) %}
-        <h1>Internacionalízate con <img src="/media/upi-portada.png" width="271" height="119" alt="UPI"></h1>
-        <p class="campaign-title">Una oportunidad para ti</p>
-        <p class="campaign-lead">Tu próximo paso profesional comienza aquí.</p>
-        <p>Complementa tu formación y fortalece tu perfil con una certificación de UPI Panamá, institución de educación superior que inició operaciones en 2017.</p>
-      {% endcall %}
-      {% call campaign_slide('alumni-estudiante', 'Estudia a tu ritmo') %}
-        <p class="kicker light-rule">El Plan Alumni</p>
-        <h2 class="campaign-title">Estudia a tu ritmo</h2>
-        <p>La alianza entre Grupo ESAM y UPI Panamá ofrece a alumnos seleccionados una beca del 100% para un diplomado autogestionado.</p>
-        <p>Organiza tus horarios, combina el estudio con tu trabajo y elige si deseas pagar la certificación internacional.</p>
-      {% endcall %}
-      {% call campaign_slide('alumni-certificado-muestra', 'Tu certificado internacional', 'campaign-document') %}
-        <p class="kicker light-rule">Certificación internacional</p>
-        <h2 class="campaign-title">Un respaldo para tu formación</h2>
-        <p>UPI Panamá emite el certificado con firma, sello institucional y acceso a verificación. Puedes elegir el formato digital sin apostilla o el físico con apostilla.</p>
-        <small>La imagen muestra un certificado de ejemplo.</small>
-      {% endcall %}
-      {% call campaign_slide('alumni-alianza', 'De Panamá a Bolivia', 'campaign-flags') %}
-        <p class="kicker light-rule">Legalización y apostilla</p>
-        <h2 class="campaign-title">De Panamá a Bolivia</h2>
-        <p>Si eliges el certificado físico, UPI gestiona la legalización y la apostilla en Panamá y coordina la entrega en Bolivia. Puedes verificar la apostilla en el sistema oficial.</p>
-      {% endcall %}
-      {% call campaign_slide('alumni-certificacion', 'Cuatro ventajas para tu trayectoria') %}
-        <p class="kicker light-rule">Ventajas destacadas</p>
-        <h2 class="campaign-title">Dale proyección a tu trayectoria</h2>
-        <ul class="campaign-benefits">
-          <li><strong>Diferenciación.</strong> Certifícate con una universidad de Panamá.</li>
-          <li><strong>Currículum.</strong> Acredita una formación adicional.</li>
-          <li><strong>Acompañamiento.</strong> Recibe tu documentación en Bolivia.</li>
-          <li><strong>Proyección internacional.</strong> La apostilla facilita presentar tu certificado en otros países.</li>
-        </ul>
-      {% endcall %}
     </div>
-      <div class="campaign-controls" aria-label="Controles de portada" role="group">
-        <button class="icon-btn" id="slide-prev" type="button" aria-label="Diapositiva anterior">{{ ico('prev') }}</button>
-        <span id="slide-count" aria-hidden="true">01 / 05</span>
-        <button class="icon-btn" id="slide-next" type="button" aria-label="Diapositiva siguiente">{{ ico('next') }}</button>
-        <button class="icon-btn" id="slide-rotation" type="button" aria-label="Pausar presentación">Ⅱ</button>
+    <div class="feature" role="region" aria-roledescription="carrusel" aria-label="Programas de portada">
+      <div class="feature-photos" aria-hidden="true">
+        {% for p, imagen in slides %}
+        <div class="hero-shot shot-{{ imagen }}{% if loop.first %} is-current{% endif %}" data-slide="{{ p.id }}">
+          <img src="/media/{{ imagen }}.webp" alt="" decoding="async">
+        </div>
+        {% endfor %}
       </div>
-    <span id="slide-status" class="sr-only" role="status"></span>
+      <div class="feature-copy">
+        <span class="feature-label">Diplomado en portada</span>
+        <button class="feature-name" data-open="{{ slides[0][0].id }}" id="feature-name" title="Consultar por este programa">{{ slides[0][0].nombre }}</button>
+      </div>
+      <div class="slide-controls">
+        <button class="slide-btn" type="button" id="slide-rotation" aria-label="Pausar rotación de portada"><span aria-hidden="true">Ⅱ</span></button>
+        <button class="slide-btn" id="slide-prev" aria-label="Programa anterior">{{ ico('prev') }}</button>
+        <span class="slide-no" aria-hidden="true"><b id="slide-number">01</b> / {{ "%02d"|format(slides|length) }}</span>
+        <button class="slide-btn" id="slide-next" aria-label="Programa siguiente">{{ ico('next') }}</button>
+      </div>
+      <span class="sr-only" role="status" id="slide-status"></span>
+    </div>
+  </div>
 </section>

@@ -50,4 +50,6 @@ RESTO = [p for numero, p in PROGRAMAS.items() if numero not in SELECCION]
 AREAS = sorted({p["area"] for p in PROGRAMAS.values()})
 AREAS_PORTADA = list(dict.fromkeys(p["seleccion"] for p in DESTACADOS))
 
+SLIDES = [(PROGRAMAS[numero], f"portada-{numero}") for numero in (1, 2, 15)]
+
 INSCRIBIBLES = {**PROGRAMAS, **{curso["id"]: curso for curso in CURSOS}}

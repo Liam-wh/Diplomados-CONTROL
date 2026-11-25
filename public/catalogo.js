@@ -4,7 +4,7 @@ const byId = id => document.getElementById(id);
 const all = selector => [...document.querySelectorAll(selector)];
 const preview = document.body.dataset.preview === 'true';
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-const firstPhoto = document.querySelector('.campaign-intro img');
+const firstPhoto = document.querySelector('.hero-shot img');
 Promise.allSettled([document.fonts.ready, firstPhoto.decode()]).then(() => {
   document.documentElement.classList.add('assets-ready');
 });
@@ -30,6 +30,73 @@ document.addEventListener('keydown', event => {
   }
 });
 matchMedia('(min-width: 768px)').addEventListener('change', () => setMenu(false));
+
+// Carrusel de diplomados en portada.
+const slides = all('[data-slide]');
+const featureName = byId('feature-name');
+const rotationButton = byId('slide-rotation');
+let slideIndex = 0;
+let slideTimer;
+let rotationPaused = reducedMotion.matches;
+
+function scheduleSlide() {
+  clearTimeout(slideTimer);
+  if (rotationButton && !rotationPaused && !document.hidden && slides.length > 1) {
+    slideTimer = setTimeout(() => moveSlide(1, false), 5000);
+  }
+}
+
+function setRotation(paused) {
+  if (!rotationButton) return;
+  rotationPaused = paused;
+  const label = paused ? 'Reanudar rotación de portada' : 'Pausar rotación de portada';
+  rotationButton.setAttribute('aria-label', label);
+  rotationButton.title = label;
+  rotationButton.firstElementChild.textContent = paused ? '▶' : 'Ⅱ';
+  scheduleSlide();
+}
+
+function moveSlide(direction, announce = true) {
+  slides[slideIndex].classList.remove('is-current');
+  slideIndex = (slideIndex + direction + slides.length) % slides.length;
+  const slide = slides[slideIndex];
+  slide.classList.add('is-current');
+  const card = programs.get(slide.dataset.slide);
+  featureName.dataset.open = slide.dataset.slide;
+  featureName.textContent = card.querySelector('h3').textContent;
+  featureName.classList.remove('changed');
+  requestAnimationFrame(() => featureName.classList.add('changed'));
+  byId('slide-number').textContent = String(slideIndex + 1).padStart(2, '0');
+  if (announce) {
+    byId('slide-status').textContent = (slideIndex + 1) + ' de ' + slides.length + '. ' + featureName.textContent;
+  }
+  scheduleSlide();
+}
+rotationButton?.addEventListener('click', () => setRotation(!rotationPaused));
+reducedMotion.addEventListener('change', event => setRotation(event.matches));
+document.addEventListener('visibilitychange', scheduleSlide);
+setRotation(rotationPaused);
+byId('slide-prev').addEventListener('click', () => moveSlide(-1));
+byId('slide-next').addEventListener('click', () => moveSlide(1));
+const hero = document.querySelector('.hero');
+hero.addEventListener('keydown', event => {
+  if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+  event.preventDefault();
+  moveSlide(event.key === 'ArrowRight' ? 1 : -1);
+});
+let swipeStart;
+hero.addEventListener('touchstart', event => {
+  swipeStart = event.touches.length === 1 ? event.touches[0] : null;
+}, {passive: true});
+hero.addEventListener('touchcancel', () => { swipeStart = null; });
+hero.addEventListener('touchend', event => {
+  if (!swipeStart || !event.changedTouches.length) return;
+  const end = event.changedTouches[0];
+  const dx = end.clientX - swipeStart.clientX;
+  const dy = end.clientY - swipeStart.clientY;
+  swipeStart = null;
+  if (Math.abs(dx) > 60 && Math.abs(dx) > 1.5 * Math.abs(dy)) moveSlide(dx < 0 ? 1 : -1);
+}, {passive: true});
 
 // La misma selección funciona en Flask y al abrir el HTML de muestra desde el disco.
 const fullCatalog = preview
