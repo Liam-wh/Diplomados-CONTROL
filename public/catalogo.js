@@ -31,11 +31,32 @@ document.addEventListener('keydown', event => {
 });
 matchMedia('(min-width: 768px)').addEventListener('change', () => setMenu(false));
 
-// En portada. El visitante controla los cambios con botones, teclado o un gesto horizontal.
+// Carrusel de diplomados en portada.
 const slides = all('[data-slide]');
 const featureName = byId('feature-name');
+const rotationButton = byId('slide-rotation');
 let slideIndex = 0;
-function moveSlide(direction) {
+let slideTimer;
+let rotationPaused = reducedMotion.matches;
+
+function scheduleSlide() {
+  clearTimeout(slideTimer);
+  if (rotationButton && !rotationPaused && !document.hidden && slides.length > 1) {
+    slideTimer = setTimeout(() => moveSlide(1, false), 5000);
+  }
+}
+
+function setRotation(paused) {
+  if (!rotationButton) return;
+  rotationPaused = paused;
+  const label = paused ? 'Reanudar rotación de portada' : 'Pausar rotación de portada';
+  rotationButton.setAttribute('aria-label', label);
+  rotationButton.title = label;
+  rotationButton.firstElementChild.textContent = paused ? '▶' : 'Ⅱ';
+  scheduleSlide();
+}
+
+function moveSlide(direction, announce = true) {
   slides[slideIndex].classList.remove('is-current');
   slideIndex = (slideIndex + direction + slides.length) % slides.length;
   const slide = slides[slideIndex];
@@ -46,8 +67,15 @@ function moveSlide(direction) {
   featureName.classList.remove('changed');
   requestAnimationFrame(() => featureName.classList.add('changed'));
   byId('slide-number').textContent = String(slideIndex + 1).padStart(2, '0');
-  byId('slide-status').textContent = (slideIndex + 1) + ' de ' + slides.length + '. ' + featureName.textContent;
+  if (announce) {
+    byId('slide-status').textContent = (slideIndex + 1) + ' de ' + slides.length + '. ' + featureName.textContent;
+  }
+  scheduleSlide();
 }
+rotationButton?.addEventListener('click', () => setRotation(!rotationPaused));
+reducedMotion.addEventListener('change', event => setRotation(event.matches));
+document.addEventListener('visibilitychange', scheduleSlide);
+setRotation(rotationPaused);
 byId('slide-prev').addEventListener('click', () => moveSlide(-1));
 byId('slide-next').addEventListener('click', () => moveSlide(1));
 const hero = document.querySelector('.hero');
