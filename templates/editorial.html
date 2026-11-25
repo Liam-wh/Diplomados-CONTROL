@@ -7,9 +7,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b1015">
   <meta name="description" content="Conoce los diplomados autogestionados del Plan Alumni UPI. Explora por área y recibe orientación sobre tu inscripción.">
-  <title>UPI Alumni · Diplomados</title>
+  <title>UPI Alumni · Diplomados y cursos</title>
   <link rel="icon" type="image/png" href="/media/upi.png">
   <link rel="stylesheet" href="/estilo.css">
+  <link rel="stylesheet" href="/alumni.css">
 </head>
 <body id="inicio" data-preview="{{ 'true' if muestra else 'false' }}" data-full="{{ 'true' if completo else 'false' }}" data-phone="{{ telefono }}" data-form-url="{{ form_url }}" data-gemini="{{ 'true' if gemini_activo else 'false' }}">
   {% include 'iconos.html' %}
@@ -22,29 +23,31 @@
       <a class="brand" href="#inicio" aria-label="UPI Alumni, inicio">{{ brand() }}</a>
       <button class="icon-btn menu-toggle" id="menu" aria-controls="navegacion" aria-expanded="false" aria-label="Abrir menú">{{ ico('menu') }}</button>
       <nav id="navegacion" aria-label="Principal">
-        <a href="#catalogo">Diplomados</a><a href="#beca">Plan Alumni</a>
-        {% if not muestra %}<a href="{{ url_for('asesores.login') }}">Asesores</a>{% endif %}
+        <a href="#catalogo">Diplomados</a><a href="#cursos">Cursos</a><a href="#beca">Plan Alumni</a>
+        {% if not muestra %}<a href="{{ url_for('asesores.login') }}" target="_blank" rel="noopener noreferrer" aria-label="Asesores (abre en otra pestaña)">Asesores</a>{% endif %}
         <a class="button nav-contact" href="{{ whatsapp_url(telefono) }}" target="_blank" rel="noopener">{{ ico('chat') }} WhatsApp{% if asesor %} · {{ asesor.nombre }}{% endif %}</a>
       </nav>
     </div>
   </header>
   <main>
-    <section class="hero" aria-labelledby="lema">
-      <div class="hero-art" aria-hidden="true">
-        {% for p, imagen in slides %}
-        <div class="hero-shot shot-{{ imagen }}{% if loop.first %} is-current{% endif %}" data-slide="{{ p.id }}">
-          <img src="/media/{{ imagen }}.webp" alt="" decoding="async" {% if loop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}>
-        </div>
-        {% endfor %}
-      </div>
+    <section class="hero campaign-hero" aria-labelledby="lema">
+      <img class="campaign-photo" src="/media/alumni-panama.webp" width="568" height="852" alt="" fetchpriority="high">
       <div class="wrap hero-inner">
         <div class="hero-copy">
-          <p class="kicker light-rule">Formación continua · UPI Panamá</p>
-          <h1 id="lema">El conocimiento<br><span>abre caminos.</span></h1>
-          <p class="hero-text">Elige un diplomado que conecte con tu trabajo. Estudia en línea, a tu ritmo.</p>
+          <h1 id="lema">Internacionalízate con <img src="/media/upi-portada.png" alt="UPI"></h1>
+          <p class="campaign-subtitle">Una oportunidad para ti</p>
+          <p class="campaign-next">Tu próximo paso profesional comienza aquí.</p>
+          <p class="campaign-audience">Una oportunidad exclusiva para alumnos seleccionados de Grupo ESAM.</p>
           <a class="button primary hero-cta" href="#catalogo">{{ ico('grid') }} Explorar catálogo</a>
         </div>
         <div class="feature" role="region" aria-roledescription="carrusel" aria-label="Programas de portada">
+      <div class="feature-photos" aria-hidden="true">
+        {% for p, imagen in slides %}
+        <div class="hero-shot shot-{{ imagen }}{% if loop.first %} is-current{% endif %}" data-slide="{{ p.id }}">
+          <img src="/media/{{ imagen }}.webp" alt="" decoding="async">
+        </div>
+        {% endfor %}
+      </div>
           <div class="feature-copy">
             <span class="feature-label">Diplomado en portada</span>
             <button class="feature-name" data-open="{{ slides[0][0].id }}" id="feature-name" title="Consultar por este programa">{{ slides[0][0].nombre }}</button>
@@ -75,12 +78,14 @@
         {% endfor %}
         <div class="results-bar">
           <div class="catalog-count" id="count" role="status">{{ (programas if completo else destacados)|length }} diplomados</div>
-          <div class="shelf-controls" id="shelf-controls" {% if not completo %}hidden{% endif %}>
+
+        </div>
+      </div>
+      <div class="rail-wrap">
+          <div class="shelf-controls rail-arrows" id="shelf-controls" {% if not completo %}hidden{% endif %}>
             <button class="icon-btn" id="shelf-prev" aria-label="Ver programas anteriores" aria-controls="programas">{{ ico('prev') }}</button>
             <button class="icon-btn" id="shelf-next" aria-label="Ver programas siguientes" aria-controls="programas">{{ ico('next') }}</button>
           </div>
-        </div>
-      </div>
       <div class="grid" id="programas">
         {% for p in programas %}
         <article class="course tone-{{ p.tono }}" data-program="{{ p.id }}" data-whatsapp="{{ whatsapp_url(telefono, 'Hola, me interesa ' ~ p.title ~ '. ¿Me orientas sobre la inscripción?') }}" data-title="{{ p.title }}" data-area="{{ p.area }}" data-selection="{{ p.seleccion }}" {% if not completo and not p.seleccion %}hidden{% endif %}>
@@ -100,7 +105,9 @@
         </article>
         {% endfor %}
       </div>
+      </div>
     </section>
+    {% include 'cursos.html' %}
     <section class="plan wrap" id="beca" aria-labelledby="plan-title">
       <div class="plan-panel">
         <div class="plan-intro">
@@ -117,6 +124,7 @@
         </div>
       </div>
     </section>
+    {% include 'alumni_slides.html' %}
   </main>
   <footer class="footer"><div class="wrap footer-inner"><span>© 2026 · Universidad Politécnica Internacional</span><a href="#inicio">{{ ico('up') }} Volver al inicio</a></div></footer>
 
@@ -228,6 +236,7 @@
   </button>
   <script type="application/json" id="once-data">{{ temas|tojson }}</script>
   <script src="/catalogo.js" defer></script>
+  <script src="/alumni.js" defer></script>
   <script src="/once.js" defer></script>
 </body>
 </html>

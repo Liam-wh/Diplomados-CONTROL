@@ -1,0 +1,36 @@
+<section class="catalog wrap short-courses" id="cursos" aria-labelledby="courses-title">
+  <div class="catalog-head">
+    <div><p class="kicker light-rule">Formación continua</p><h2 id="courses-title">Cursos autogestionados</h2></div>
+    <a class="button secondary" href="https://drive.google.com/file/d/1frY5gF4Q1DSjy919k3CutHRQ_YjoPoub/view" target="_blank" rel="noopener">{{ ico('book') }} Catálogo en PDF</a>
+  </div>
+  <div class="catalog-tools">
+    <div class="filters" id="course-filters" role="group" aria-label="Filtrar cursos por área de interés">
+      <button type="button" data-profile="" aria-pressed="true">Todos</button>
+      {% for perfil in perfiles_cursos %}<button type="button" data-profile="{{ perfil }}" aria-pressed="false">{{ perfil }}</button>{% endfor %}
+    </div>
+    <span class="catalog-count" id="course-count" role="status">{{ cursos|length }} cursos</span>
+  </div>
+  <div class="rail-wrap">
+    <div class="grid shelf course-track" id="course-track" tabindex="0" role="region" aria-label="Listado de cursos">
+      {% for c in cursos %}
+      <article class="course" data-profiles="{{ c.perfiles|join('|') }}">
+        <div class="cover">
+          <img src="/media/curso-{{ c.id }}.webp" width="640" height="360" loading="lazy" alt="">
+          <span class="area-tag"><i aria-hidden="true"></i>{{ c.area }}</span>
+        </div>
+        <div class="course-body">
+          <h3>{{ c.nombre }}</h3>
+          <div class="card-actions">
+            <a class="button course-cta" href="{{ whatsapp_url(telefono, 'Hola, me interesa el ' ~ c.title ~ '. ¿Me orientas sobre la inscripción?') }}" target="_blank" rel="noopener">{{ ico('chat') }} Consultar</a>
+            <a class="button syllabus" href="{{ c.brochure }}" target="_blank" rel="noopener" aria-label="Ver temario de {{ c.nombre }}">{{ ico('book') }} Ver temario</a>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    <div class="rail-arrows">
+      <button class="icon-btn" type="button" id="course-prev" aria-controls="course-track" aria-label="Ver curso anterior" disabled>{{ ico('prev') }}</button>
+      <button class="icon-btn" type="button" id="course-next" aria-controls="course-track" aria-label="Ver curso siguiente">{{ ico('next') }}</button>
+    </div>
+  </div>
+</section>

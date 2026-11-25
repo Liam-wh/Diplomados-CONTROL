@@ -16,10 +16,23 @@ TONOS = {
     "Medioambiente": "mint", "Derecho": "lilac", "Finanzas": "apricot",
     "Gestión empresarial": "apricot", "Marketing y comunicación": "lilac",
 }
+# Áreas de interés del catálogo de programas autogestionados de UPI.
+PERFILES_CURSOS = {
+    "Empresarial": {8, 9, 13, 16, 23, 24, 25, 29, 30, 32, 34, 35},
+    "Ingeniería": {9, 23, 24, 34},
+    "Salud": {13, 17, 23, 24, 32, 34},
+    "Legal": {8, 9, 13, 23, 30},
+}
+CURSOS = []
 PROGRAMAS = {}
 for programa in json.loads(Path(__file__).with_name("catalogo.json").read_text(encoding="utf-8")):
     titulo = programa["title"]
     tipo, resto = titulo.split(" ", 1)
+    if tipo == "Curso":
+        CURSOS.append({
+            **programa, "nombre": resto.removeprefix("en "),
+            "perfiles": [area for area, ids in PERFILES_CURSOS.items() if programa["id"] in ids],
+        })
     if tipo != "Diplomado":
         continue
     nombre = resto.removeprefix("en ")
