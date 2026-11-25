@@ -9,7 +9,8 @@
 }
 .campaign-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 36%; transition: opacity .65s ease; }
 .campaign-photo:not(.is-current) { opacity: 0; }
-.campaign-background .hero-shot img { width: 100%; object-position: 45% 36%; }
+.campaign-background .hero-shot img { width: 100%; object-position: 21% 36%; }
+.campaign-background .shot-portada-15 img { object-position: 18% 36%; }
 .guide-button { margin-left: auto; margin-right: 1rem; }
 .campaign-hero .hero-inner {
   min-height: clamp(34rem, 72svh, 49rem);
