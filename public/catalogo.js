@@ -8,8 +8,8 @@ const firstPhoto = document.querySelector('.campaign-intro img');
 Promise.allSettled([document.fonts.ready, firstPhoto.decode()]).then(() => {
   document.documentElement.classList.add('assets-ready');
 });
-const cards = all('[data-program]');
-const programs = new Map(cards.map(card => [card.dataset.program, card]));
+const cards = all('#programas [data-program]');
+const programs = new Map(all('[data-program]').map(card => [card.dataset.program, card]));
 const menuButton = byId('menu');
 const navigation = byId('navegacion');
 
@@ -125,12 +125,16 @@ function saveDraft() {
   for (const name of inputNames) saved[name] = field(name).value;
 }
 function syncPayment() {
-  const external = field('perfil').value === 'externo';
+  const course = programs.get(activeProgram)?.dataset.kind === 'curso';
+  byId('certification-choice').hidden = course;
+  field('certificacion').disabled = course;
+  byId('payment-step-label').textContent = course ? 'Datos de inscripción y pago' : 'Certificación y pago';
+  const external = !course && field('perfil').value === 'externo';
   field('certificacion').querySelector('[value="digital"]').disabled = external;
   if (external) field('certificacion').value = 'fisico';
   const amount = field('certificacion').selectedOptions[0]?.dataset.tarifa;
-  byId('tarifa').hidden = !amount;
-  byId('tarifa').textContent = external
+  byId('tarifa').hidden = !course && !amount;
+  byId('tarifa').textContent = course ? 'Admisiones te confirmará las condiciones y el importe del curso.' : external
     ? 'Referencia para externos: Bs 1.500 al inscribirte y Bs 700 por la certificación al finalizar. Total: Bs 2.200.'
     : 'Tarifa de certificación del Plan Alumni: Bs ' + (amount || '') + '.';
   const paid = field('pago').value === 'realizado';
@@ -317,7 +321,7 @@ form.addEventListener('submit', async event => {
     const notice = document.createElement('p');
     notice.className = 'delivery-notice';
     notice.setAttribute('role', 'status');
-    notice.textContent = 'Envío sin confirmar. Abre «Me interesa» para revisar tu solicitud.';
+    notice.textContent = 'Envío sin confirmar. Abre el formulario del programa para revisar tu solicitud.';
     programs.get(id).querySelector('.card-actions').before(notice);
   }
 });

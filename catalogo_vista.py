@@ -30,7 +30,7 @@ for programa in json.loads(Path(__file__).with_name("catalogo.json").read_text(e
     tipo, resto = titulo.split(" ", 1)
     if tipo == "Curso":
         CURSOS.append({
-            **programa, "nombre": resto.removeprefix("en "),
+            **programa, "tipo": tipo, "nombre": resto.removeprefix("en "),
             "perfiles": [area for area, ids in PERFILES_CURSOS.items() if programa["id"] in ids],
         })
     if tipo != "Diplomado":
@@ -49,3 +49,5 @@ DESTACADOS = [PROGRAMAS[numero] for numero in SELECCION]
 RESTO = [p for numero, p in PROGRAMAS.items() if numero not in SELECCION]
 AREAS = sorted({p["area"] for p in PROGRAMAS.values()})
 AREAS_PORTADA = list(dict.fromkeys(p["seleccion"] for p in DESTACADOS))
+
+INSCRIBIBLES = {**PROGRAMAS, **{curso["id"]: curso for curso in CURSOS}}

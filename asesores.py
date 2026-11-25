@@ -11,7 +11,7 @@ from uuid import UUID, uuid4
 from flask import Blueprint, Response, abort, flash, current_app, jsonify, make_response, redirect, render_template, request, session, url_for
 
 from adjuntos import leer_comprobante
-from catalogo_vista import PROGRAMAS
+from catalogo_vista import INSCRIBIBLES
 from inscripcion import preparar
 from panel_datos import exportar_excel, filtrar, inscripciones
 from supabase_api import SupabaseError, configurado, consultar, perfil_publico
@@ -65,7 +65,7 @@ def registrar():
     if not configurado():
         return jsonify(message="El registro de inscripciones no está disponible."), 503
     form = request.form
-    programa = PROGRAMAS.get(form.get("program", type=int))
+    programa = INSCRIBIBLES.get(form.get("program", type=int))
     try:
         inscripcion = preparar(form, programa)
         adjunto = leer_comprobante(request.files.get("attachment"), form.get("pago"))
@@ -205,7 +205,7 @@ def dashboard(token, asesor):
             session["asesor_inicio"] = int(fecha_inicio.timestamp())
     return render_template(
         "asesores.html", asesor=asesor, csrf=session["asesor_csrf"], enlace=enlace,
-        compartir=whatsapp_url(mensaje="Te comparto el catálogo de diplomados UPI Alumni: " + enlace),
+        compartir=whatsapp_url(mensaje="Te comparto el catálogo de cursos y diplomados UPI Alumni: " + enlace),
         filas=filas[(pagina-1)*25:pagina*25], total=len(filas), pagados=sum(f["pagado"] for f in filas),
         monto=sum(f["monto"] for f in filas), filtros=filtros, pagina=pagina, paginas=paginas,
         programas=sorted({f["programa"] for f in todas}), inicio=fecha_inicio, whatsapp_url=whatsapp_url,

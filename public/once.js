@@ -10,7 +10,7 @@
   const qr = get('qr-dialog');
   get('once-face').src = trigger.querySelector('img').src;
   const topics = JSON.parse(get('once-data').textContent);
-  const courses = [...document.querySelectorAll('[data-program]')].map(el => ({
+  const courses = [...document.querySelectorAll('#programas [data-program]')].map(el => ({
     id: Number(el.dataset.program), name: el.querySelector('h3').textContent,
     area: el.dataset.area, fullName: el.dataset.title, el, ...topics[el.dataset.program]
   }));

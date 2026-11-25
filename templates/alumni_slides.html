@@ -1,13 +1,18 @@
 {% macro campaign_slide(image, title, style='', first=false) %}
 <article class="campaign-slide {{ style }}" aria-label="{{ title }}" {% if not first %}hidden{% endif %}>
-  <div class="campaign-visual">
+  <div class="campaign-visual" style="--campaign-image: url('/media/{{ image }}.webp')">
     <img src="/media/{{ image }}.webp" alt="" {% if first %}fetchpriority="high"{% endif %}>
   </div>
-  <div class="campaign-copy">{{ caller() }}</div>
+  <div class="campaign-copy">
+    {{ caller() }}
+      <div class="campaign-links">
+        <a class="button primary" href="#catalogo">{{ ico('grid') }} Explorar catálogo</a>
+        <a class="brochure-link" href="https://drive.google.com/file/d/1Zpj767rrtTo8AqaY8-y6rluNYpFxNamg/view" target="_blank" rel="noopener">Ver folleto completo {{ ico('book') }}</a>
+      </div>
+  </div>
 </article>
 {% endmacro %}
 <section class="campaign" aria-label="Plan Alumni de UPI Panamá" aria-roledescription="carrusel">
-  <div class="wrap">
     <div class="campaign-stage" id="campaign-stage">
       {% call campaign_slide('alumni-panama', 'Internacionalízate con UPI', 'campaign-intro', true) %}
         <h1>Internacionalízate con <img src="/media/upi-portada.png" width="271" height="119" alt="UPI"></h1>
@@ -43,18 +48,11 @@
         </ul>
       {% endcall %}
     </div>
-    <div class="campaign-footer">
       <div class="campaign-controls" aria-label="Controles de portada" role="group">
         <button class="icon-btn" id="slide-prev" type="button" aria-label="Diapositiva anterior">{{ ico('prev') }}</button>
         <span id="slide-count" aria-hidden="true">01 / 05</span>
         <button class="icon-btn" id="slide-next" type="button" aria-label="Diapositiva siguiente">{{ ico('next') }}</button>
         <button class="icon-btn" id="slide-rotation" type="button" aria-label="Pausar presentación">Ⅱ</button>
       </div>
-      <div class="campaign-links">
-        <a class="button primary" href="#catalogo">{{ ico('grid') }} Explorar catálogo</a>
-        <a class="brochure-link" href="https://drive.google.com/file/d/1Zpj767rrtTo8AqaY8-y6rluNYpFxNamg/view" target="_blank" rel="noopener">Ver folleto completo {{ ico('book') }}</a>
-      </div>
-    </div>
     <span id="slide-status" class="sr-only" role="status"></span>
-  </div>
 </section>

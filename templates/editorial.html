@@ -130,9 +130,9 @@
               <button class="button primary next-step" type="button" id="continue">Continuar</button>
             </section>
             <section class="form-step" id="payment-step" aria-labelledby="payment-title" hidden>
-              <h3 class="step-title" id="payment-title"><span>2 de 2</span> Certificación y pago</h3>
+              <h3 class="step-title" id="payment-title"><span>2 de 2</span> <b id="payment-step-label">Certificación y pago</b></h3>
               <div class="field-pair cert-pair"><label>Tipo de participante<select name="perfil" required><option value="">Selecciona tu perfil</option><option value="alumni">Plan Alumni</option><option value="externo">Nuevo o externo</option></select></label>
-              <label>Tipo de certificación<select name="certificacion" required><option value="">Selecciona una modalidad</option>{% for codigo, datos in certificados.items() %}<option value="{{ codigo }}" data-tarifa="{{ datos[1] }}">{{ datos[0] }}</option>{% endfor %}</select></label></div>
+              <label id="certification-choice">Tipo de certificación<select name="certificacion" required><option value="">Selecciona una modalidad</option>{% for codigo, datos in certificados.items() %}<option value="{{ codigo }}" data-tarifa="{{ datos[1] }}">{{ datos[0] }}</option>{% endfor %}</select></label></div>
               <p class="tarifa" id="tarifa" aria-live="polite" hidden></p>
               <div class="payment-choice"><button class="button secondary" type="button" data-show-qr>{{ ico('grid') }} QR de pago</button>
               <label>¿Ya realizaste un pago?<select name="pago" required><option value="pendiente">Aún no he pagado</option><option value="realizado">Sí, ya realicé el pago</option></select></label></div>

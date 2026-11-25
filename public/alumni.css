@@ -24,28 +24,49 @@
 .once-bubble, .once-head .icon-btn, .once-picker select, #once-input { background: #292723; border-color: #514a40; }
 .once-bubble.own, .once-action, .once-suggest button, .wa-button, .chosen-icon, .step-title span, .tarifa { background: #392a1b; color: #ffdab0; border-color: #775637; }
 .campaign {
-  --columns: minmax(0, .95fr) minmax(0, 1.05fr);
-  --column-gap: clamp(2rem, 4vw, 6rem);
+  position: relative;
+  isolation: isolate;
   overflow: hidden;
-  background: radial-gradient(ellipse at 18% 35%, #30291f, #131313 56%, #101010);
+  background: #15120f;
   border-bottom: 1px solid var(--line);
-  padding-block: clamp(1.5rem, 4vh, 3.5rem) 1.3rem;
 }
 .campaign-stage { display: grid; }
-.campaign-slide, .campaign-footer { display: grid; grid-template-columns: var(--columns); column-gap: var(--column-gap); align-items: center; }
-.campaign-slide { grid-area: 1 / 1; min-height: clamp(27rem, 63svh, 42rem); }
-.campaign-slide[hidden] { display: grid !important; visibility: hidden; }
-.campaign-slide:not([hidden]) { animation: campaign-in .45s ease-out; }
-@keyframes campaign-in { from { opacity: .1; transform: translateX(1.4rem); } }
-.campaign-visual {
-  align-self: stretch; min-height: 100%; position: relative; overflow: hidden;
-  border-radius: 3px;
-  background: radial-gradient(ellipse at 50% 60%, #4c443a, #262420 60%, #181818);
+.campaign-slide {
+  position: relative;
+  isolation: isolate;
+  grid-area: 1 / 1;
+  display: grid;
+  align-items: center;
+  min-height: clamp(34rem, 74svh, 52rem);
+  padding: clamp(2rem, 5vh, 4rem) var(--gutter);
 }
-.campaign-visual img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: .75rem; }
-.campaign-intro .campaign-visual img { padding: 0; object-fit: cover; object-position: 50% 31%; }
-.campaign-document .campaign-visual img, .campaign-flags .campaign-visual img { padding: clamp(1rem, 3vw, 3rem); }
-.campaign-copy { min-width: 0; padding-block: 1rem; }
+.campaign-slide[hidden] { display: grid !important; visibility: hidden; }
+.campaign-slide:not([hidden]) .campaign-copy { animation: campaign-in .4s ease-out; }
+@keyframes campaign-in { from { opacity: .4; transform: translateY(.4rem); } }
+.campaign-visual { position: absolute; z-index: -1; inset: 0; overflow: hidden; background: #221e19; }
+.campaign-visual::before, .campaign-visual::after { content: ""; position: absolute; inset: 0; }
+.campaign-visual::before {
+  inset: -3%;
+  background: var(--campaign-image) center 40% / cover no-repeat;
+  filter: blur(20px) brightness(.55);
+}
+.campaign-visual img {
+  position: absolute; inset: 0 auto 0 0; width: 56%; height: 100%;
+  object-fit: contain; object-position: 48% bottom;
+  mask-image: linear-gradient(to right, black 63%, transparent);
+}
+.campaign-intro .campaign-visual img { object-fit: cover; object-position: 50% 30%; }
+.campaign-document .campaign-visual img, .campaign-flags .campaign-visual img {
+  object-position: center; padding: clamp(1.5rem, 4vw, 4rem);
+}
+.campaign-visual::after {
+  background: linear-gradient(90deg, transparent 25%, #14121024 36%, #141210e8 57%, #141210e0),
+              linear-gradient(to top, #100f0ec2, transparent 18%);
+}
+.campaign-copy {
+  width: min(49%, 46rem); min-width: 0; margin-left: 50%;
+  text-shadow: 0 1px 12px #0004;
+}
 .campaign h1 { font-size: clamp(2.3rem, 3vw, 3.7rem); line-height: 1.03; letter-spacing: -.05em; }
 .campaign h1 img { width: clamp(14.5rem, 19vw, 20.5rem); height: auto; margin: .5rem 0 1.25rem; }
 .campaign-title { color: #ffa01b; font-size: clamp(2.7rem, 4.2vw, 5rem); font-weight: 790; letter-spacing: -.055em; line-height: 1.02; }
@@ -56,12 +77,11 @@
 .campaign-benefits { padding-left: 1.15em; }
 .campaign-benefits li { margin-top: .4em; }
 .campaign-benefits li::marker { color: #ff980e; }
-.campaign-footer { margin-top: 1rem; }
 .campaign-controls, .campaign-links { display: flex; align-items: center; gap: .6rem; }
-.campaign-controls { justify-content: center; }
+.campaign-controls { position: absolute; bottom: 1rem; left: var(--gutter); padding: .25rem .45rem; border-radius: 2rem; background: #17130fd9; }
 .campaign-controls .icon-btn { width: 44px; height: 44px; border-radius: 50%; }
 #slide-count { font-variant-numeric: tabular-nums; color: #e1d8c9; font-size: .87rem; }
-.campaign-links { gap: clamp(.9rem, 2vw, 2rem); flex-wrap: wrap; }
+.campaign-links { margin-top: 1.35rem; gap: clamp(.9rem, 2vw, 2rem); flex-wrap: wrap; }
 .brochure-link { display: inline-flex; align-items: center; gap: .4rem; min-height: 44px; text-decoration: underline; text-underline-offset: .25em; color: #ffcb84; font-weight: 620; }
 .rail-wrap { position: relative; }
 .rail-arrows {
@@ -85,9 +105,10 @@
   .grid.course-track { gap: 1.5rem; grid-auto-columns: calc((100% - 3rem) / 3); }
 }
 @media (max-width: 767px) {
-  .campaign { --columns: minmax(0, .74fr) minmax(0, 1fr); --column-gap: .75rem; padding-block: 1rem .75rem; }
-  .campaign-slide { min-height: 19rem; }
-  .campaign-copy { padding-block: .4rem; }
+  .campaign-slide { min-height: 24rem; padding: 1.35rem var(--gutter) 4.65rem; }
+  .campaign-copy { width: 62%; margin-left: 38%; }
+  .campaign-visual img { width: 54%; object-position: center; }
+  .campaign-visual::after { background: linear-gradient(90deg, transparent 15%, #14121052 30%, #141210ed 49%, #141210ed); }
   .campaign h1 { font-size: clamp(1rem, 3.7vw, 1.5rem); }
   .campaign h1 img { width: 5.8rem; margin: .4rem 0 .75rem; }
   .campaign-title { font-size: clamp(1.5rem, 5.5vw, 2.5rem); }
@@ -96,14 +117,13 @@
   .campaign-copy p.campaign-lead { font-size: 1rem; }
   .campaign-copy small { font-size: .75rem; }
   .campaign-document .campaign-visual img, .campaign-flags .campaign-visual img { padding: .35rem; }
-  .campaign-footer { display: flex; flex-wrap: wrap; gap: .45rem 1rem; justify-content: space-between; }
   .campaign-controls, .campaign-links { flex-wrap: wrap; }
   .campaign-controls { gap: .25rem; }
-  .campaign-links { column-gap: 1rem; }
+  .campaign-links { margin-top: .85rem; gap: .25rem .75rem; }
   .campaign-links a { font-size: .85rem; }
   .rail-arrows { inset-inline: .15rem; }
   .course-track .course .cover { min-height: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .campaign-slide:not([hidden]) { animation: none; }
+  .campaign-slide:not([hidden]) .campaign-copy { animation: none; }
 }

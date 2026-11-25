@@ -30,9 +30,8 @@ def preparar(form, programa):
     sede = texto(form, "sede", "Sede", 120, False)
     asesor = texto(form, "asesor", "Persona que te atendió", 120, False)
     perfil, cert = form.get("perfil"), form.get("certificacion")
-    if perfil not in PERFIL or cert not in CERTIFICACION or (perfil == "externo" and cert != "fisico"):
-        raise ValueError("Revisa tu perfil y la modalidad de certificación.")
-    modalidad, tarifa = CERTIFICACION[cert]
+    if perfil not in PERFIL:
+        raise ValueError("Revisa tu perfil de participante.")
     hoy = fecha_bolivia()
     lineas = [
         ("Fecha de solicitud de inscripción (Bolivia)", hoy.isoformat()),
@@ -40,10 +39,14 @@ def preparar(form, programa):
         ("Correo del estudiante", email), ("Programa", programa["title"]),
         ("Perfil declarado", PERFIL[perfil]), ("Sede indicada", sede or "Por asignar"),
         ("Personal de sede indicado", asesor or "Por asignar"),
-        ("Tipo de certificación", modalidad), ("Tarifa de certificación (Bs)", str(tarifa)),
     ]
-    if perfil == "externo":
-        lineas.append(("Referencia para externos (Bs)", "1.500 de formación + 700 de certificación = 2.200"))
+    if programa["tipo"] == "Diplomado":
+        if cert not in CERTIFICACION or (perfil == "externo" and cert != "fisico"):
+            raise ValueError("Revisa tu perfil y la modalidad de certificación.")
+        modalidad, tarifa = CERTIFICACION[cert]
+        lineas.extend([("Tipo de certificación", modalidad), ("Tarifa de certificación (Bs)", str(tarifa))])
+        if perfil == "externo":
+            lineas.append(("Referencia para externos (Bs)", "1.500 de formación + 700 de certificación = 2.200"))
     estado = form.get("pago")
     if estado == "realizado":
         try:

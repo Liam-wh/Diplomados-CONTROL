@@ -13,7 +13,7 @@
   <div class="rail-wrap">
     <div class="grid shelf course-track" id="course-track" tabindex="0" role="region" aria-label="Listado de cursos">
       {% for c in cursos %}
-      <article class="course" data-profiles="{{ c.perfiles|join('|') }}">
+      <article class="course" data-program="{{ c.id }}" data-kind="curso" data-title="{{ c.title }}" data-profiles="{{ c.perfiles|join('|') }}">
         <div class="cover">
           <img src="/media/curso-{{ c.id }}.webp" width="640" height="360" loading="lazy" alt="">
           <span class="area-tag"><i aria-hidden="true"></i>{{ c.area }}</span>
@@ -21,7 +21,7 @@
         <div class="course-body">
           <h3>{{ c.nombre }}</h3>
           <div class="card-actions">
-            <a class="button course-cta" href="{{ whatsapp_url(telefono, 'Hola, me interesa el ' ~ c.title ~ '. ¿Me orientas sobre la inscripción?') }}" target="_blank" rel="noopener">{{ ico('chat') }} Consultar</a>
+            <button type="button" class="button course-cta" data-open="{{ c.id }}" aria-label="Registrarse en {{ c.nombre }}">{{ ico('mail') }} Registrarse</button>
             <a class="button syllabus" href="{{ c.brochure }}" target="_blank" rel="noopener" aria-label="Ver temario de {{ c.nombre }}">{{ ico('book') }} Ver temario</a>
           </div>
         </div>

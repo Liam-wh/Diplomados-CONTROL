@@ -64,10 +64,15 @@
   document.getElementById('slide-prev').addEventListener('click', () => show(-1, true));
   document.getElementById('slide-next').addEventListener('click', () => show(1, true));
   const campaign = document.querySelector('.campaign');
+  campaign.addEventListener('focusin', event => {
+    if (event.target.closest('.campaign-links')) setPaused(true);
+  });
   campaign.addEventListener('keydown', event => {
     if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
     event.preventDefault();
+    const linkIndex = [...stories[current].querySelectorAll('a')].indexOf(event.target);
     show(event.key === 'ArrowRight' ? 1 : -1, true);
+    if (linkIndex >= 0) stories[current].querySelectorAll('a')[linkIndex].focus();
   });
   let touchStart;
   campaign.addEventListener('touchstart', event => {
