@@ -4,7 +4,7 @@ const byId = id => document.getElementById(id);
 const all = selector => [...document.querySelectorAll(selector)];
 const preview = document.body.dataset.preview === 'true';
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-const firstPhoto = document.querySelector('.hero-shot img');
+const firstPhoto = document.querySelector('.campaign-photo');
 Promise.allSettled([document.fonts.ready, firstPhoto.decode()]).then(() => {
   document.documentElement.classList.add('assets-ready');
 });
@@ -35,14 +35,14 @@ matchMedia('(min-width: 768px)').addEventListener('change', () => setMenu(false)
 const slides = all('[data-slide]');
 const featureName = byId('feature-name');
 const rotationButton = byId('slide-rotation');
-let slideIndex = 0;
+let slideIndex = -1;
 let slideTimer;
 let rotationPaused = reducedMotion.matches;
 
 function scheduleSlide() {
   clearTimeout(slideTimer);
   if (rotationButton && !rotationPaused && !document.hidden && slides.length > 1) {
-    slideTimer = setTimeout(() => moveSlide(1, false), 5000);
+    slideTimer = setTimeout(() => moveSlide(1, false), slideIndex === -1 ? 10000 : 5000);
   }
 }
 
@@ -57,10 +57,16 @@ function setRotation(paused) {
 }
 
 function moveSlide(direction, announce = true) {
-  slides[slideIndex].classList.remove('is-current');
-  slideIndex = (slideIndex + direction + slides.length) % slides.length;
+  if (slideIndex === -1) {
+    document.querySelector('.campaign-photo').classList.add('intro-complete');
+    slideIndex = direction > 0 ? 0 : slides.length - 1;
+  } else {
+    slides[slideIndex].classList.remove('is-current');
+    slideIndex = (slideIndex + direction + slides.length) % slides.length;
+  }
   const slide = slides[slideIndex];
   slide.classList.add('is-current');
+  byId('feature-photo').src = slide.querySelector('img').src;
   const card = programs.get(slide.dataset.slide);
   featureName.dataset.open = slide.dataset.slide;
   featureName.textContent = card.querySelector('h3').textContent;

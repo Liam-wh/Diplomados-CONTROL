@@ -1,15 +1,16 @@
 .campaign-hero {
   background: #08131e;
 }
-.campaign-photo {
-  position: absolute;
-  inset: 0 auto 0 0;
-  height: 100%;
-  width: 50%;
-  object-fit: cover;
-  object-position: 48% 32%;
-  mask-image: linear-gradient(to right, #000 68%, transparent);
+.campaign-background, .campaign-background::after { position: absolute; inset: 0; pointer-events: none; }
+.campaign-background { z-index: -1; }
+.campaign-background::after {
+  content: ""; background: linear-gradient(90deg, transparent 24%, #08131e40 42%, #08131edb 67%, #08131edd);
 }
+.campaign-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 36%; transition: opacity .65s ease; }
+.campaign-photo.intro-complete { opacity: 0; }
+.campaign-background .hero-shot img { width: 100%; object-position: 45% 36%; }
+.feature-photos img { height: 100%; object-fit: cover; }
+.guide-button { margin-left: auto; margin-right: 1rem; }
 .campaign-hero .hero-inner {
   min-height: clamp(34rem, 72svh, 49rem);
   padding-block: clamp(2rem, 5vh, 4rem) 1.5rem;
@@ -22,8 +23,12 @@
   line-height: 1.15;
   letter-spacing: -.035em;
 }
-.campaign-hero h1 img { width: clamp(8rem, 13vw, 13rem); margin-top: .5rem; }
-.campaign-subtitle { color: var(--mint); font-weight: 800; line-height: 1.06; font-size: clamp(1.6rem, 3.4vw, 3.75rem); letter-spacing: -.045em; }
+.campaign-hero h1 img { width: clamp(13rem, 19vw, 20rem); margin-top: .5rem; }
+.campaign-subtitle { position: relative; isolation: isolate; padding: .18em 0 .23em .4em; color: white; font-weight: 800; line-height: 1.06; font-size: clamp(1.6rem, 3.4vw, 3.75rem); letter-spacing: -.045em; }
+.campaign-subtitle::before {
+  content: ""; position: absolute; z-index: -1; inset: 0 -50vw 0 0; background: #bd4e04;
+  border: 1px solid #ffab60; border-right: 0; border-radius: .2em 0 0 .2em;
+}
 .campaign-next { margin-top: .5rem; font-size: clamp(1.1rem, 1.7vw, 1.6rem); font-weight: 640; line-height: 1.2; }
 .campaign-audience { margin-top: .8rem; max-width: 42ch; color: #c2ced5; }
 .hero-links { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem 1.25rem; margin-top: 1.15rem; }
@@ -56,9 +61,11 @@
 @media (max-width: 767px) {
   .campaign-hero .hero-inner { min-height: auto; padding-block: 1.75rem .85rem; gap: 1.4rem; }
   .campaign-hero .hero-copy { width: 57%; align-self: flex-end; margin: 0; }
-  .campaign-photo { width: 48%; height: calc(100% - 4.4rem); object-position: 47% 32%; }
+  .campaign-photo { object-position: 23% 50%; }
+  .campaign-background::after { background: linear-gradient(90deg, transparent 14%, #08131e66 35%, #08131ef2 65%); }
+  .guide-button { margin-right: .45rem; }
   .campaign-hero h1 { font-size: clamp(1rem, 3.7vw, 1.5rem); margin-bottom: .75rem; }
-  .campaign-hero h1 img { width: 5.8rem; }
+  .campaign-hero h1 img { width: 7.2rem; }
   .campaign-subtitle { font-size: clamp(1.5rem, 5.5vw, 2.5rem); }
   .campaign-next { font-size: 1rem; }
   .campaign-audience { font-size: .85rem; margin-top: .45rem; line-height: 1.35; }
@@ -68,4 +75,8 @@
   .hero-brochure { font-size: .85rem; }
   .rail-arrows { inset-inline: .15rem; }
   .course-track .course .cover { min-height: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .campaign-photo { transition: none; }
 }

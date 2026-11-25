@@ -1,5 +1,12 @@
 <section class="hero campaign-hero" aria-labelledby="lema">
-  <img class="campaign-photo" src="/media/alumni-panama.webp" width="568" height="852" alt="" fetchpriority="high">
+  <div class="campaign-background" aria-hidden="true">
+    <img class="campaign-photo" src="/media/panama-portada.webp" width="1536" height="1024" alt="" fetchpriority="high">
+        {% for p, imagen in slides %}
+        <div class="hero-shot shot-{{ imagen }}" data-slide="{{ p.id }}">
+          <img src="/media/{{ imagen }}.webp" alt="" decoding="async">
+        </div>
+        {% endfor %}
+  </div>
   <div class="wrap hero-inner">
     <div class="hero-copy">
       <h1 id="lema">Internacionalízate con <img src="/media/upi-portada.png" alt="UPI"></h1>
@@ -13,11 +20,7 @@
     </div>
     <div class="feature" role="region" aria-roledescription="carrusel" aria-label="Programas de portada">
       <div class="feature-photos" aria-hidden="true">
-        {% for p, imagen in slides %}
-        <div class="hero-shot shot-{{ imagen }}{% if loop.first %} is-current{% endif %}" data-slide="{{ p.id }}">
-          <img src="/media/{{ imagen }}.webp" alt="" decoding="async">
-        </div>
-        {% endfor %}
+        <img id="feature-photo" src="/media/{{ slides[0][1] }}.webp" alt="">
       </div>
       <div class="feature-copy">
         <span class="feature-label">Diplomado en portada</span>
