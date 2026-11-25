@@ -1,0 +1,107 @@
+{% macro icono(nombre) -%}<svg class="ico" aria-hidden="true"><use href="#i-{{ nombre }}"/></svg>{%- endmacro %}
+{% macro marca() -%}<img src="/media/upi.png" width="42" height="42" alt="UPI"><span>Alumni<span class="brand-sub">Admisiones</span></span>{%- endmacro %}
+{% macro avisos() -%}{% for mensaje in get_flashed_messages() %}<p class="notice" role="status">{{ mensaje }}</p>{% endfor %}{%- endmacro %}
+{% macro kpi(titulo,valor,icon,color) -%}<article class="metric {{ color }}"><div><span>{{ titulo }}</span><span class="metric-icon">{{ icono(icon) }}</span></div><strong>{{ valor }}</strong></article>{%- endmacro %}
+<!doctype html><html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ 'Inicio de sesión' if login else 'Mi cuenta' if cuenta else 'Panel de admisiones' }} · UPI Alumni</title>
+<link rel="icon" href="/media/upi.png"><link rel="stylesheet" href="/panel.css">
+</head><body>
+{% include 'iconos.html' %}
+{% if login %}
+<main class="login-layout">
+  <section class="login-art"><a class="brand" href="/">{{ marca() }}</a><div class="art-caption">Universidad Politécnica Internacional</div></section>
+  <section class="login-side"><div class="login-card">
+    <span class="section-tag">{{ icono('lock') }} Acceso de asesores</span><h1>Iniciar sesión</h1>
+    {{ avisos() }}{% if error %}<p class="alert" role="alert">{{ error }}</p>{% endif %}
+    {% if listo %}<form method="post" class="fields"><input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Usuario<input name="usuario" autocomplete="username" autocapitalize="none" maxlength="254" required autofocus></label>
+    <label>Contraseña<input type="password" name="password" autocomplete="current-password" maxlength="256" required></label>
+    <button class="btn primary" type="submit">Iniciar sesión</button></form>{% else %}<p>El acceso de asesores aún no está habilitado.</p>{% endif %}
+    <a class="backlink" href="/">Volver al catálogo</a>
+  </div></section>
+</main>
+{% else %}
+<div class="shell">
+<aside class="rail"><a class="brand" href="/">{{ marca() }}</a>
+<nav aria-label="Panel del asesor">
+<a class="{{ 'selected' if not cuenta }}" href="{{ url_for('asesores.dashboard') }}">{{ icono('grid') }} Resumen</a>
+<a class="{{ 'selected' if cuenta }}" href="{{ url_for('asesores.cuenta') }}">{{ icono('lock') }} Mi cuenta</a>
+</nav>
+<div class="rail-bottom">
+{% if asesor %}<div class="identity"><span class="avatar">{{ asesor.nombre[:1]|upper }}</span><span><strong>{{ asesor.nombre }}</strong><small>@{{ asesor.codigo }}</small></span></div>{% endif %}
+<form method="post" action="{{ url_for('asesores.salir') }}"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="logout">Cerrar sesión</button></form></div></aside>
+<main class="workspace">
+<header class="topline"><span>Admisiones <b>/</b> {{ 'Mi cuenta' if cuenta else 'Resumen' }}</span>{% if inicio %}<span>{{ icono('clock') }} Inicio de sesión · {{ inicio.strftime('%d/%m/%Y · %H:%M') }} (Bolivia)</span>{% endif %}</header>
+{% if error %}<p role="alert" class="alert">{{ error }}</p><a href="{{ url_for('asesores.dashboard') }}">Volver al resumen</a>
+{% elif cuenta %}
+<div class="heading"><div><h1>Mi cuenta</h1><p>Datos de acceso y perfil de asesor.</p></div></div>{{ avisos() }}
+{% if error_cuenta %}<p class="alert" role="alert">{{ error_cuenta }}</p>{% endif %}
+<div class="account-grid"><section class="panel pad"><h2>{{ icono('book') }} Perfil del asesor</h2>
+<form class="fields" method="post"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="accion" value="perfil">
+<label>Nombre del asesor<input name="nombre" value="{{ asesor.nombre }}" maxlength="120" required></label>
+<label>Usuario<input name="usuario" value="{{ asesor.codigo }}" maxlength="40" pattern="[a-z0-9][a-z0-9\-]{0,39}" autocomplete="username" required></label>
+<small>Usa letras minúsculas, números o guiones. Si cambias el usuario, vuelve a compartir el enlace de tu catálogo.</small>
+<button class="btn primary">Guardar perfil</button></form></section>
+<section class="panel pad"><h2>{{ icono('lock') }} Cambiar contraseña</h2><form class="fields" method="post"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="accion" value="clave">
+<label>Contraseña actual<input type="password" name="actual" autocomplete="current-password" required maxlength="256"></label>
+<label>Nueva contraseña<input type="password" name="nueva" autocomplete="new-password" required maxlength="256"></label>
+<label>Confirmar nueva contraseña<input type="password" name="confirmar" autocomplete="new-password" required maxlength="256"></label>
+<button class="btn primary">Actualizar contraseña</button></form></section></div>
+{% else %}
+<div class="heading"><div><h1>Panel de admisiones</h1><p>Seguimiento de las inscripciones de {{ asesor.nombre }}.</p></div>
+<a class="btn primary" href="{{ url_for('asesores.excel', **enlaces) }}">{{ icono('stack') }} Descargar Excel</a></div>
+{{ avisos() }}
+<div class="metrics">
+{{ kpi('Inscripciones',total,'stack','blue') }}{{ kpi('Con pago declarado',pagados,'check','teal') }}
+{{ kpi('Sin pago declarado',total-pagados,'clock','amber') }}{{ kpi('Monto declarado','Bs ' ~ ('{:,.2f}'.format(monto)|replace(',', 'X')|replace('.', ',')|replace('X','.')),'award','violet') }}
+</div>
+<section class="share panel"><span class="share-symbol">{{ icono('book') }}</span><div class="share-link"><strong>Mi catálogo</strong><a href="{{ enlace }}" title="{{ enlace }}">{{ enlace }}</a></div>
+<a class="btn subtle" href="{{ compartir }}" target="_blank" rel="noopener noreferrer">{{ icono('chat') }} Compartir</a></section>
+<section class="panel records"><header class="records-head"><h2>Mis inscripciones</h2><span>{{ total }} {{ 'resultado' if total == 1 else 'resultados' }}</span></header>
+<form class="filters" method="get" action="{{ url_for('asesores.dashboard') }}">
+<label>Buscar estudiante<input type="search" name="q" value="{{ filtros.q }}" placeholder="Nombre, CI, correo o WhatsApp"></label>
+<label>Programa<select name="programa" aria-label="Programa"><option value="">Todos los programas</option>{% for p in programas %}<option value="{{ p }}" {{ 'selected' if filtros.programa==p }}>{{ p }}</option>{% endfor %}</select></label>
+<label>Pago<select name="pago" aria-label="Pago"><option value="">Todos los estados</option><option value="declarado" {{ 'selected' if filtros.pago=='declarado' }}>Declarado</option><option value="pendiente" {{ 'selected' if filtros.pago=='pendiente' }}>Pendiente</option></select></label>
+<label>Desde<input type="date" name="desde" value="{{ filtros.desde }}"></label><label>Hasta<input type="date" name="hasta" value="{{ filtros.hasta }}"></label>
+<div class="filter-buttons"><button class="btn secondary">Filtrar</button>{% if enlaces %}<a href="{{ url_for('asesores.dashboard') }}">Limpiar</a>{% endif %}</div></form>
+<div class="table-scroll" tabindex="0" aria-label="Tabla de inscripciones"><table>
+<thead><tr><th>Estudiante</th><th>Programa</th><th>Fecha</th><th>Pago declarado</th><th class="numeric">Monto (Bs)</th><th>Acciones</th></tr></thead>
+<tbody>{% for f in filas %}<tr><td><strong>{{ f.nombre }}</strong><small>{{ f.correo }}</small></td><td class="program">{{ f.programa }}</td><td class="date">{{ f.fecha }}</td>
+<td><span class="status {{ 'paid' if f.pagado }}">{{ 'Por verificar' if f.pagado else 'Sin pago' }}</span></td><td class="numeric">{{ ('%.2f'|format(f.monto)|replace('.', ',')) if f.pagado else '—' }}</td>
+<td><div class="row-actions">
+{% set link = f.datos.get('Enlace al comprobante') or '' %}
+{% if f.comprobante_tipo or link.startswith('https://') %}
+  {% set vista = url_for('asesores.comprobante', inscripcion_id=f.id, vista=1) if f.comprobante_tipo else link %}
+  <a href="{{ vista }}" data-recibo="{{ 'imagen' if f.comprobante_tipo else 'enlace' }}" data-estudiante="{{ f.nombre }}" title="Ver recibo" aria-label="Ver recibo de {{ f.nombre }}">{{ icono('eye') }}</a>
+{% endif %}
+{% if f.comprobante_tipo %}
+  <a href="{{ url_for('asesores.comprobante', inscripcion_id=f.id) }}" title="Descargar comprobante" aria-label="Descargar comprobante">{{ icono('stack') }}</a>
+  {% if link.startswith('https://') %}<a href="{{ link }}" data-recibo="enlace" data-estudiante="{{ f.nombre }}" title="Abrir enlace al comprobante" aria-label="Abrir enlace al comprobante">{{ icono('book') }}</a>{% endif %}
+{% endif %}
+<a href="mailto:{{ f.correo }}" title="Enviar correo" aria-label="Enviar correo">{{ icono('mail') }}</a>
+{% if f.whatsapp %}<a href="{{ whatsapp_url(f.whatsapp, 'Hola, te escribo de UPI Alumni sobre tu solicitud de inscripción en ' ~ f.programa ~ '.') }}" target="_blank" rel="noopener noreferrer" title="Contactar por WhatsApp" aria-label="Contactar por WhatsApp">{{ icono('chat') }}</a>{% endif %}
+<button type="button" class="delete-action" data-eliminar="{{ url_for('asesores.eliminar_inscripcion', inscripcion_id=f.id, pagina=pagina, **enlaces) }}" data-estudiante="{{ f.nombre }}" data-programa="{{ f.programa }}" title="Eliminar inscripción" aria-label="Eliminar inscripción de {{ f.nombre }}">{{ icono('trash') }}</button>
+</div></td></tr>{% else %}<tr><td colspan="6" class="empty">{{ 'Ninguna inscripción coincide con estos filtros.' if enlaces else 'Aún no tienes inscripciones asignadas.' }}</td></tr>{% endfor %}</tbody></table></div>
+<footer class="pager"><span>Página {{ pagina }} de {{ paginas }}</span><div>
+{% if pagina>1 %}<a class="btn subtle" href="{{ url_for('asesores.dashboard',pagina=pagina-1, **enlaces) }}">Anterior</a>{% endif %}
+{% if pagina<paginas %}<a class="btn subtle" href="{{ url_for('asesores.dashboard',pagina=pagina+1, **enlaces) }}">Siguiente</a>{% endif %}
+</div></footer></section>
+<dialog id="visor-recibo" class="panel-dialog visor" aria-labelledby="titulo-recibo">
+  <header><h2 id="titulo-recibo">Recibo</h2><form method="dialog"><button class="btn subtle" aria-label="Cerrar recibo" autofocus>{{ icono('close') }}</button></form></header>
+  <div id="contenido-recibo"></div>
+  <p id="alternativa-recibo" hidden>Si el proveedor bloquea la vista previa, <a rel="noreferrer" id="original-recibo">abre el original</a>.</p>
+</dialog>
+<dialog id="confirmar-eliminar" class="panel-dialog" aria-labelledby="titulo-eliminar" aria-describedby="detalle-eliminar">
+  <h2 id="titulo-eliminar">¿Eliminar inscripción?</h2>
+  <p id="detalle-eliminar"></p>
+  <form method="post" id="form-eliminar">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <button type="button" class="btn subtle" id="cancelar-eliminar" autofocus>Cancelar</button>
+    <button type="submit" class="btn danger">Eliminar inscripción</button>
+  </form>
+</dialog>
+<script src="{{ url_for('static', filename='panel-acciones.js') }}" defer></script>
+{% endif %}
+</main></div>{% endif %}
+</body></html>
