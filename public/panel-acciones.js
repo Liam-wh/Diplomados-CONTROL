@@ -40,3 +40,27 @@ document.querySelector('.records').addEventListener('click', event => {
 
 visor.addEventListener('close', () => contenido.replaceChildren());
 document.getElementById('cancelar-eliminar').addEventListener('click', () => confirmar.close());
+
+const botonCopiar = document.getElementById('copiar-catalogo');
+const enlaceCatalogo = document.getElementById('enlace-catalogo');
+const estadoCopia = document.getElementById('estado-copia');
+let temporizadorCopia;
+botonCopiar.addEventListener('click', async () => {
+  clearTimeout(temporizadorCopia);
+  try {
+    await navigator.clipboard.writeText(enlaceCatalogo.href);
+    botonCopiar.querySelector('use').setAttribute('href', '#i-check');
+    estadoCopia.textContent = 'Enlace copiado';
+  } catch {
+    const seleccion = window.getSelection();
+    const rango = document.createRange();
+    rango.selectNodeContents(enlaceCatalogo);
+    seleccion.removeAllRanges();
+    seleccion.addRange(rango);
+    estadoCopia.textContent = 'Copia el enlace seleccionado con el menú de tu navegador.';
+  }
+  temporizadorCopia = setTimeout(() => {
+    botonCopiar.querySelector('use').setAttribute('href', '#i-copy');
+    estadoCopia.textContent = '';
+  }, 4000);
+});

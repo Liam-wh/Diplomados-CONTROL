@@ -56,7 +56,8 @@
 {{ kpi('Inscripciones',total,'stack','blue') }}{{ kpi('Con pago declarado',pagados,'check','teal') }}
 {{ kpi('Sin pago declarado',total-pagados,'clock','amber') }}{{ kpi('Monto declarado','Bs ' ~ ('{:,.2f}'.format(monto)|replace(',', 'X')|replace('.', ',')|replace('X','.')),'award','violet') }}
 </div>
-<section class="share panel"><span class="share-symbol">{{ icono('book') }}</span><div class="share-link"><strong>Mi catálogo</strong><a href="{{ enlace }}" title="{{ enlace }}">{{ enlace }}</a></div>
+<section class="share panel"><span class="share-symbol">{{ icono('book') }}</span><div class="share-link"><strong>Mi catálogo</strong><a id="enlace-catalogo" href="{{ enlace }}" title="{{ enlace }}">{{ enlace }}</a><small role="status" id="estado-copia"></small></div>
+<button type="button" id="copiar-catalogo" class="btn subtle" aria-label="Copiar enlace del catálogo" title="Copiar enlace del catálogo">{{ icono('copy') }}</button>
 <a class="btn subtle" href="{{ compartir }}" target="_blank" rel="noopener noreferrer">{{ icono('chat') }} Compartir</a></section>
 <section class="panel records"><header class="records-head"><h2>Mis inscripciones</h2><span>{{ total }} {{ 'resultado' if total == 1 else 'resultados' }}</span></header>
 <form class="filters" method="get" action="{{ url_for('asesores.dashboard') }}">
