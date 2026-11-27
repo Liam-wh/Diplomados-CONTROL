@@ -6,6 +6,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{ 'Inicio de sesión' if login else 'Mi cuenta' if cuenta else 'Panel de admisiones' }} · UPI Alumni</title>
 <link rel="icon" href="/media/upi.png"><link rel="stylesheet" href="/panel.css">
+{% if login %}<link rel="stylesheet" href="/acceso.css"><script src="/acceso.js" defer></script>{% endif %}
 </head><body>
 {% include 'iconos.html' %}
 {% if login %}
@@ -14,10 +15,7 @@
   <section class="login-side"><div class="login-card">
     <span class="section-tag">{{ icono('lock') }} Acceso de asesores</span><h1>Iniciar sesión</h1>
     {{ avisos() }}{% if error %}<p class="alert" role="alert">{{ error }}</p>{% endif %}
-    {% if listo %}<form method="post" class="fields"><input type="hidden" name="csrf" value="{{ csrf }}">
-    <label>Usuario<input name="usuario" autocomplete="username" autocapitalize="none" maxlength="254" required autofocus></label>
-    <label>Contraseña<input type="password" name="password" autocomplete="current-password" maxlength="256" required></label>
-    <button class="btn primary" type="submit">Iniciar sesión</button></form>{% else %}<p>El acceso de asesores aún no está habilitado.</p>{% endif %}
+    {% if listo %}{% include 'acceso_form.html' %}{% else %}<p>El acceso de asesores aún no está habilitado.</p>{% endif %}
     <a class="backlink" href="/">Volver al catálogo</a>
   </div></section>
 </main>

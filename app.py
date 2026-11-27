@@ -1,5 +1,6 @@
 import os
 import re
+from datetime import timedelta
 from flask import Flask, abort, render_template, request, send_from_directory, url_for
 
 from catalogo_vista import AREAS, AREAS_PORTADA, CURSOS, DESTACADOS, PERFILES_CURSOS, RESTO, SLIDES
@@ -18,6 +19,8 @@ app.config.update(
     SECRET_KEY=os.getenv("FLASK_SECRET_KEY") or None,
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
+    PERMANENT_SESSION_LIFETIME=timedelta(days=7),
+    SESSION_REFRESH_EACH_REQUEST=False,
     SESSION_COOKIE_SECURE=bool(os.getenv("VERCEL") or os.getenv("PUBLIC_SITE_URL", "").startswith("https://")),
 )
 app.register_blueprint(once)

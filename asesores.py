@@ -102,6 +102,8 @@ def configurado_acceso():
 def login_pagina(error=None, status=200):
     listo = configurado_acceso()
     csrf = session.setdefault("asesor_csrf", token_urlsafe(32)) if listo else ""
+    if request.args.get("modal") == "1":
+        return jsonify(csrf=csrf, error=error if listo else "El acceso de asesores aún no está habilitado."), status
     return render_template("asesores.html", login=True, listo=listo, csrf=csrf, error=error), status
 
 
@@ -111,12 +113,54 @@ def csrf_valido():
     return bool(esperado and enviado.isascii() and compare_digest(esperado, enviado))
 
 
+def entrar_al_panel():
+    destino = url_for(".dashboard")
+    if request.args.get("modal") == "1":
+        return jsonify(destino=destino)
+    return redirect(destino, 303)
+
+
+def guardar_acceso(acceso):
+    session["asesor_token"] = acceso["access_token"]
+    session["asesor_expira"] = int(time()) + min(acceso.get("expires_in", 3600), 3600)
+    if session.permanent:
+        session["asesor_refresh"] = acceso["refresh_token"]
+
+
+def token_de_sesion():
+    if not configurado_acceso() or not session.get("asesor_token"):
+        return None
+    ahora = time()
+    if session.permanent and ahora >= session.get("asesor_limite", 0):
+        return None
+    if ahora < session.get("asesor_expira", 0) - (30 if session.permanent else 0):
+        return session["asesor_token"]
+    if not session.get("asesor_refresh"):
+        return None
+    try:
+        acceso = consultar("/auth/v1/token", params={"grant_type": "refresh_token"},
+                           datos={"refresh_token": session["asesor_refresh"]})
+    except SupabaseError as error:
+        if error.status in (400, 401, 403, 422):
+            return None
+        raise
+    guardar_acceso(acceso)
+    return session["asesor_token"]
+
+
 @asesores.route("/asesores", methods=["GET", "POST"])
 @privada
 def login():
     if not configurado_acceso():
         return login_pagina(status=503)
     if request.method == "GET":
+        if session.get("asesor_token"):
+            try:
+                if token_de_sesion():
+                    return entrar_al_panel()
+            except SupabaseError:
+                return login_pagina("No se pudo recuperar tu sesión. Vuelve a intentarlo.", 503)
+            session.clear()
         return login_pagina()
     if not csrf_valido():
         return login_pagina("La página caducó. Vuelve a ingresar tus datos.", 400)
@@ -150,10 +194,12 @@ def login():
         return login_pagina("El servicio de acceso no está disponible en este momento.", 503)
     session.clear()
     session["asesor_inicio"] = int(time())
-    session["asesor_token"] = token
-    session["asesor_expira"] = int(time()) + min(acceso.get("expires_in", 3600), 3600)
+    if request.form.get("recordar") == "1":
+        session.permanent = True
+        session["asesor_limite"] = session["asesor_inicio"] + int(current_app.permanent_session_lifetime.total_seconds())
+    guardar_acceso(acceso)
     session["asesor_csrf"] = token_urlsafe(32)
-    return redirect(url_for(".dashboard"), 303)
+    return entrar_al_panel()
 
 
 def volver_al_acceso():
@@ -164,10 +210,10 @@ def volver_al_acceso():
 def con_asesor(vista):
     @wraps(vista)
     def protegida(*args, **kwargs):
-        token = session.get("asesor_token")
-        if not configurado_acceso() or not token or session.get("asesor_expira", 0) <= time():
-            return volver_al_acceso()
         try:
+            token = token_de_sesion()
+            if not token:
+                return volver_al_acceso()
             asesor = perfil(token)
             if not asesor:
                 return volver_al_acceso()
@@ -320,10 +366,10 @@ def eliminar_inscripcion(token, asesor, inscripcion_id):
 @asesores.get("/dashboard/comprobantes/<uuid:inscripcion_id>")
 @privada
 def comprobante(inscripcion_id):
-    token = session.get("asesor_token")
-    if not configurado_acceso() or not token or session.get("asesor_expira", 0) <= time():
-        return redirect(url_for(".login"))
     try:
+        token = token_de_sesion()
+        if not token:
+            return volver_al_acceso()
         filas = consultar("/rest/v1/inscripciones", token=token, params={
             "select": "comprobante_tipo,comprobante_imagen", "id": "eq." + str(inscripcion_id),
             "comprobante_tipo": "not.is.null", "limit": 1,
@@ -347,11 +393,11 @@ def comprobante(inscripcion_id):
 def salir():
     if not csrf_valido():
         return "La página caducó. Vuelve al panel para cerrar sesión.", 400
-    token = session.get("asesor_token")
-    session.clear()
-    if token and configurado_acceso():
-        try:
+    try:
+        token = token_de_sesion()
+        if token:
             consultar("/auth/v1/logout", token=token, params={"scope": "local"}, datos={})
-        except SupabaseError:
-            pass
+    except SupabaseError:
+        pass
+    session.clear()
     return redirect(url_for(".login"), 303)

@@ -1,0 +1,13 @@
+<form id="acceso-form" class="fields" method="post" action="{{ url_for('asesores.login') }}">
+  <input type="hidden" name="csrf" value="{{ csrf|default('') }}">
+  <label for="acceso-usuario">Usuario o correo</label>
+  <input id="acceso-usuario" name="usuario" autocomplete="username" autocapitalize="none" maxlength="254" required>
+  <label for="acceso-clave">Contraseña</label>
+  <div class="acceso-clave">
+    <input id="acceso-clave" type="password" name="password" autocomplete="current-password" maxlength="256" required>
+    <button hidden type="button" id="acceso-ojo" aria-label="Mostrar contraseña" title="Mostrar contraseña" aria-controls="acceso-clave"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#i-eye"/></svg></button>
+  </div>
+  <label class="acceso-recordar"><input type="checkbox" name="recordar" value="1"> Mantener mi sesión durante 7 días</label>
+  <p id="acceso-error" role="alert" hidden></p>
+  <button class="button btn primary" type="submit">Iniciar sesión</button>
+</form>
