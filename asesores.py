@@ -12,7 +12,7 @@ from flask import Blueprint, Response, abort, flash, current_app, jsonify, make_
 
 from adjuntos import leer_comprobante
 from catalogo_vista import INSCRIBIBLES
-from inscripcion import preparar
+from inscripcion import preparar, texto
 from panel_datos import exportar_excel, filtrar, inscripciones
 from supabase_api import SupabaseError, configurado, consultar, perfil_publico
 
@@ -217,22 +217,32 @@ def dashboard(token, asesor):
 @privada
 @con_asesor
 def cuenta(token, asesor):
+    identidad = consultar("/auth/v1/user", token=token)
+
     def mostrar(error=None, status=200):
         return render_template("asesores.html", cuenta=True, asesor=asesor, csrf=session["asesor_csrf"],
+                               identidad=identidad, profesional=identidad.get("user_metadata") or {},
                                error_cuenta=error), status
     if request.method == "GET":
         return mostrar()
     if not csrf_valido():
         return mostrar("La página caducó. Recarga antes de guardar.", 400)
-    if request.form.get("accion") == "perfil":
+    accion = request.form.get("accion")
+    if accion == "perfil":
         nombre = request.form.get("nombre", "").strip()
         codigo = request.form.get("usuario", "").strip().lower()
         if not 1 <= len(nombre) <= 120 or not nombre.isprintable() or not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,39}", codigo):
             return mostrar("Revisa el nombre y el formato del usuario.", 400)
+        cambios = {"nombre": nombre, "codigo": codigo}
+        if "whatsapp" in request.form:
+            numero = re.sub(r"[ ().-]", "", request.form["whatsapp"].strip()).removeprefix("+")
+            if not re.fullmatch(r"[1-9][0-9]{7,14}", numero):
+                return mostrar("Escribe tu WhatsApp con el código de país, por ejemplo +591 7000 0000.", 400)
+            cambios["whatsapp"] = numero
         try:
             actualizado = consultar("/rest/v1/asesores", servidor=True, metodo="PATCH",
                          params={"id": "eq."+asesor["id"], "activo": "eq.true", "select": "id"},
-                         prefer="return=representation", datos={"nombre": nombre, "codigo": codigo})
+                         prefer="return=representation", datos=cambios)
         except SupabaseError as error:
             if error.status == 409:
                 return mostrar("Ese usuario ya está en uso. Elige otro.", 409)
@@ -241,25 +251,52 @@ def cuenta(token, asesor):
             return volver_al_acceso()
         flash("Datos del asesor actualizados.")
         return redirect(url_for(".cuenta"), 303)
-    if request.form.get("accion") != "clave":
+    if accion == "profesional":
+        try:
+            datos = {campo: texto(request.form, campo, campo.capitalize(), 120, obligatorio=False)
+                     for campo in ("sede", "cargo")}
+        except ValueError as error:
+            return mostrar(str(error), 400)
+        consultar("/auth/v1/user", token=token, metodo="PUT", datos={"data": datos})
+        flash("Sede y cargo guardados.")
+        return redirect(url_for(".cuenta"), 303)
+    if accion not in ("correo", "clave"):
         abort(400)
     actual = request.form.get("actual", "")
-    nueva = request.form.get("nueva", "")
-    if not actual or not nueva or len(nueva) > 256 or nueva != request.form.get("confirmar"):
-        return mostrar("Revisa la contraseña actual y la confirmación de la nueva.", 400)
-    identidad = consultar("/auth/v1/user", token=token)
+    if not actual or len(actual) > 256:
+        return mostrar("Introduce tu contraseña actual.", 400)
+    if accion == "correo":
+        correo = request.form.get("correo", "").strip()
+        if len(correo) > 254 or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", correo):
+            return mostrar("Escribe un correo electrónico válido.", 400)
+        if correo.casefold() == identidad["email"].casefold():
+            return mostrar("El nuevo correo coincide con tu correo actual.", 400)
+        cambio = {"email": correo}
+    else:
+        nueva = request.form.get("nueva", "")
+        if not nueva or len(nueva) > 256 or nueva != request.form.get("confirmar"):
+            return mostrar("Revisa la nueva contraseña y su confirmación.", 400)
+        cambio = {"password": nueva}
     try:
         acceso = consultar("/auth/v1/token", params={"grant_type":"password"},
                            datos={"email": identidad["email"], "password": actual})
         if acceso["user"]["id"] != asesor["id"]:
             return volver_al_acceso()
-        consultar("/auth/v1/user", metodo="PUT", token=acceso["access_token"], datos={"password": nueva})
+        actualizado = consultar("/auth/v1/user", metodo="PUT", token=acceso["access_token"], datos=cambio)
     except SupabaseError as error:
         if error.status == 429:
             return mostrar("Demasiados intentos. Vuelve a probar en unos minutos.", 429)
         if error.status in (400, 401, 403, 422):
+            if accion == "correo":
+                return mostrar("No se pudo cambiar el correo. Revisa la dirección y la contraseña actual.", 400)
             return mostrar("Comprueba la contraseña actual y elige una nueva que cumpla los requisitos de Supabase.", 400)
         raise
+    if accion == "correo":
+        if actualizado.get("email", "").casefold() == correo.casefold():
+            flash("Correo de acceso actualizado.")
+        else:
+            flash("Cambio solicitado. Revisa el correo actual y el nuevo para completar la confirmación.")
+        return redirect(url_for(".cuenta"), 303)
     session.clear()
     flash("Contraseña actualizada. Inicia sesión con tu nueva contraseña.")
     return redirect(url_for(".login"), 303)

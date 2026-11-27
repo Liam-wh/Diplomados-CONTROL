@@ -39,10 +39,24 @@
 {% if error_cuenta %}<p class="alert" role="alert">{{ error_cuenta }}</p>{% endif %}
 <div class="account-grid"><section class="panel pad"><h2>{{ icono('book') }} Perfil del asesor</h2>
 <form class="fields" method="post"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="accion" value="perfil">
-<label>Nombre del asesor<input name="nombre" value="{{ asesor.nombre }}" maxlength="120" required></label>
-<label>Usuario<input name="usuario" value="{{ asesor.codigo }}" maxlength="40" pattern="[a-z0-9][a-z0-9\-]{0,39}" autocomplete="username" required></label>
+<label>Nombre del asesor<input name="nombre" value="{{ request.form.get('nombre', asesor.nombre) }}" maxlength="120" autocomplete="name" required></label>
+<label>WhatsApp del catálogo<input type="tel" name="whatsapp" value="{{ request.form.get('whatsapp', '+' ~ asesor.whatsapp) }}" autocomplete="tel" maxlength="32" aria-describedby="ayuda-whatsapp" required></label>
+<small id="ayuda-whatsapp">Incluye el código de país. Los botones de WhatsApp de tu catálogo abrirán un chat con este número.</small>
+<label>Usuario<input name="usuario" value="{{ request.form.get('usuario', asesor.codigo) }}" maxlength="40" pattern="[a-z0-9][a-z0-9\-]{0,39}" autocomplete="username" required></label>
 <small>Usa letras minúsculas, números o guiones. Si cambias el usuario, vuelve a compartir el enlace de tu catálogo.</small>
 <button class="btn primary">Guardar perfil</button></form></section>
+<section class="panel pad"><h2>{{ icono('award') }} Datos profesionales</h2>
+<form class="fields" method="post"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="accion" value="profesional">
+<label>Sede (opcional)<input name="sede" value="{{ request.form.get('sede', profesional.get('sede', '')) }}" maxlength="120" placeholder="Ej. La Paz"></label>
+<label>Cargo (opcional)<input name="cargo" value="{{ request.form.get('cargo', profesional.get('cargo', '')) }}" maxlength="120" autocomplete="organization-title" placeholder="Ej. Asesor de admisiones"></label>
+<button class="btn primary">Guardar sede y cargo</button></form></section>
+<section class="panel pad"><h2>{{ icono('mail') }} Correo de acceso</h2>
+<p>Correo actual · <strong>{{ identidad.email }}</strong></p>
+{% if identidad.new_email %}<p class="notice" role="status">Pendiente de confirmación · {{ identidad.new_email }}</p>{% endif %}
+<form class="fields" method="post"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="accion" value="correo">
+<label>Nuevo correo<input type="email" name="correo" value="{{ request.form.get('correo', '') }}" autocomplete="email" maxlength="254" required></label>
+<label>Contraseña actual<input type="password" name="actual" autocomplete="current-password" maxlength="256" required></label>
+<button class="btn primary">Cambiar correo</button></form></section>
 <section class="panel pad"><h2>{{ icono('lock') }} Cambiar contraseña</h2><form class="fields" method="post"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="accion" value="clave">
 <label>Contraseña actual<input type="password" name="actual" autocomplete="current-password" required maxlength="256"></label>
 <label>Nueva contraseña<input type="password" name="nueva" autocomplete="new-password" required maxlength="256"></label>
