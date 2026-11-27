@@ -6,7 +6,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{ 'Inicio de sesión' if login else 'Mi cuenta' if cuenta else 'Panel de admisiones' }} · UPI Alumni</title>
 <link rel="icon" href="/media/upi.png"><link rel="stylesheet" href="/panel.css">
-{% if login %}<link rel="stylesheet" href="/acceso.css"><script src="/acceso.js" defer></script>{% endif %}
+{% if login %}<link rel="stylesheet" href="/acceso.css"><script src="/acceso.js" defer></script>{% else %}<script src="/panel-sesion.js" defer></script>{% endif %}
 </head><body>
 {% include 'iconos.html' %}
 {% if login %}
@@ -20,7 +20,7 @@
   </div></section>
 </main>
 {% else %}
-<div class="shell">
+<div class="shell" data-segundos-sesion="{{ segundos_sesion }}" data-catalogo="{{ url_for('home', _anchor='catalogo') }}" data-consultar-sesion="{{ url_for('asesores.login', modal=1) }}">
 <aside class="rail"><a class="brand" href="/">{{ marca() }}</a>
 <nav aria-label="Panel del asesor">
 <a class="{{ 'selected' if not cuenta }}" href="{{ url_for('asesores.dashboard') }}">{{ icono('grid') }} Resumen</a>

@@ -116,8 +116,18 @@ def csrf_valido():
 def entrar_al_panel():
     destino = url_for(".dashboard")
     if request.args.get("modal") == "1":
-        return jsonify(destino=destino)
+        return jsonify(destino=destino, segundos_sesion=segundos_sesion())
     return redirect(destino, 303)
+
+
+def segundos_sesion():
+    limite = session.get("asesor_limite", session.get("asesor_expira", 0))
+    return max(0, limite - int(time()))
+
+
+@asesores.context_processor
+def vigencia_del_panel():
+    return {"segundos_sesion": segundos_sesion()}
 
 
 def guardar_acceso(acceso):
@@ -202,9 +212,11 @@ def login():
     return entrar_al_panel()
 
 
-def volver_al_acceso():
+def volver_al_catalogo(mensaje=None):
     session.clear()
-    return redirect(url_for(".login"))
+    if mensaje:
+        flash(mensaje, "catalogo")
+    return redirect(url_for("home", _anchor="catalogo"), 303)
 
 
 def con_asesor(vista):
@@ -213,14 +225,14 @@ def con_asesor(vista):
         try:
             token = token_de_sesion()
             if not token:
-                return volver_al_acceso()
+                return volver_al_catalogo()
             asesor = perfil(token)
             if not asesor:
-                return volver_al_acceso()
+                return volver_al_catalogo()
             return vista(token, asesor, *args, **kwargs)
         except SupabaseError as error:
             if error.status == 401:
-                return volver_al_acceso()
+                return volver_al_catalogo()
             return render_template("asesores.html", error="Supabase no pudo completar la consulta. Vuelve a intentarlo.",
                                    csrf=session["asesor_csrf"]), 503
     return protegida
@@ -294,7 +306,7 @@ def cuenta(token, asesor):
                 return mostrar("Ese usuario ya está en uso. Elige otro.", 409)
             raise
         if not actualizado:
-            return volver_al_acceso()
+            return volver_al_catalogo()
         flash("Datos del asesor actualizados.")
         return redirect(url_for(".cuenta"), 303)
     if accion == "profesional":
@@ -327,7 +339,7 @@ def cuenta(token, asesor):
         acceso = consultar("/auth/v1/token", params={"grant_type":"password"},
                            datos={"email": identidad["email"], "password": actual})
         if acceso["user"]["id"] != asesor["id"]:
-            return volver_al_acceso()
+            return volver_al_catalogo()
         actualizado = consultar("/auth/v1/user", metodo="PUT", token=acceso["access_token"], datos=cambio)
     except SupabaseError as error:
         if error.status == 429:
@@ -343,9 +355,7 @@ def cuenta(token, asesor):
         else:
             flash("Cambio solicitado. Revisa el correo actual y el nuevo para completar la confirmación.")
         return redirect(url_for(".cuenta"), 303)
-    session.clear()
-    flash("Contraseña actualizada. Inicia sesión con tu nueva contraseña.")
-    return redirect(url_for(".login"), 303)
+    return volver_al_catalogo("Contraseña actualizada. Para volver a tu panel, pulsa Asesores.")
 
 
 @asesores.post("/dashboard/inscripciones/<uuid:inscripcion_id>/eliminar")
@@ -369,14 +379,14 @@ def comprobante(inscripcion_id):
     try:
         token = token_de_sesion()
         if not token:
-            return volver_al_acceso()
+            return volver_al_catalogo()
         filas = consultar("/rest/v1/inscripciones", token=token, params={
             "select": "comprobante_tipo,comprobante_imagen", "id": "eq." + str(inscripcion_id),
             "comprobante_tipo": "not.is.null", "limit": 1,
         })
     except SupabaseError as error:
         if error.status in (401, 403):
-            return volver_al_acceso()
+            return volver_al_catalogo()
         abort(503)
     if not filas:
         abort(404)
@@ -391,6 +401,8 @@ def comprobante(inscripcion_id):
 @asesores.post("/asesores/salir")
 @privada
 def salir():
+    if not session.get("asesor_token"):
+        return volver_al_catalogo()
     if not csrf_valido():
         return "La página caducó. Vuelve al panel para cerrar sesión.", 400
     try:
@@ -399,5 +411,4 @@ def salir():
             consultar("/auth/v1/logout", token=token, params={"scope": "local"}, datos={})
     except SupabaseError:
         pass
-    session.clear()
-    return redirect(url_for(".login"), 303)
+    return volver_al_catalogo()

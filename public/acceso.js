@@ -21,6 +21,13 @@
   url.searchParams.set('modal', '1');
   let apertura = 0;
 
+  function mostrarFormulario() {
+    if (!popup.hidden) return;
+    popup.hidden = false;
+    abrir.setAttribute('aria-expanded', 'true');
+    form.elements.usuario.focus({preventScroll: true});
+  }
+
   async function consultar(opciones) {
     const turno = apertura;
     enviar.disabled = true;
@@ -28,7 +35,7 @@
     try {
       const respuesta = await fetch(url, {cache: 'no-store', ...opciones});
       const datos = await respuesta.json();
-      if (popup.hidden || turno !== apertura) return;
+      if (turno !== apertura) return;
       if (datos.destino) {
         cerrar();
         window.location.assign(datos.destino);
@@ -36,19 +43,25 @@
       }
       if (datos.csrf) form.elements.csrf.value = datos.csrf;
       if (!respuesta.ok || datos.error) throw new Error(datos.error || 'Vuelve a intentarlo.');
+      mostrarFormulario();
     } catch (fallo) {
-      if (popup.hidden || turno !== apertura) return;
+      if (turno !== apertura) return;
+      mostrarFormulario();
       error.textContent = fallo instanceof TypeError || fallo instanceof SyntaxError
         ? 'No se pudo conectar. Revisa tu conexión y vuelve a intentarlo.' : fallo.message;
       error.hidden = false;
     } finally {
-      if (turno === apertura) enviar.disabled = false;
+      if (turno === apertura) {
+        abrir.removeAttribute('aria-busy');
+        enviar.disabled = false;
+      }
     }
   }
 
   function cerrar(devolverFoco = false) {
-    if (popup.hidden) return;
+    if (popup.hidden && !abrir.hasAttribute('aria-busy')) return;
     apertura++;
+    abrir.removeAttribute('aria-busy');
     popup.hidden = true;
     abrir.setAttribute('aria-expanded', 'false');
     form.reset();
@@ -60,20 +73,18 @@
   abrir.addEventListener('click', event => {
     if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
-    if (!popup.hidden) {
+    if (!popup.hidden || abrir.hasAttribute('aria-busy')) {
       cerrar(true);
       return;
     }
     apertura++;
-    popup.hidden = false;
-    abrir.setAttribute('aria-expanded', 'true');
-    form.elements.usuario.focus({preventScroll: true});
+    abrir.setAttribute('aria-busy', 'true');
     consultar();
   });
   document.getElementById('cerrar-acceso').addEventListener('click', () => cerrar(true));
   const ancla = abrir.parentElement;
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && !popup.hidden) {
+    if (event.key === 'Escape' && (!popup.hidden || abrir.hasAttribute('aria-busy'))) {
       event.preventDefault();
       event.stopPropagation();
       cerrar(true);
@@ -85,6 +96,7 @@
   document.addEventListener('click', cerrarDesdeFuera);
   document.addEventListener('focusin', cerrarDesdeFuera);
   matchMedia('(min-width: 768px)').addEventListener('change', () => cerrar());
+  window.addEventListener('pagehide', () => cerrar());
   form.addEventListener('submit', async event => {
     event.preventDefault();
     if (enviar.disabled) return;

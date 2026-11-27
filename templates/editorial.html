@@ -43,6 +43,7 @@
   <main>
     {% include 'alumni_slides.html' %}
     <section class="catalog wrap" id="catalogo" aria-labelledby="catalog-title">
+      {% for mensaje in get_flashed_messages(category_filter=['catalogo']) %}<p role="status">{{ mensaje }}</p>{% endfor %}
       <div class="catalog-head">
         <div><p class="kicker light-rule">Catálogo académico</p><h2 id="catalog-title">Encuentra tu diplomado.</h2></div>
         <a class="button secondary scope-link" id="scope-link" href="{{ ('?vista=seleccion' if completo else '?vista=completa') if muestra else alcance }}{{ '#catalogo' if muestra else '' }}">
