@@ -26,7 +26,16 @@
       <button class="icon-btn menu-toggle" id="menu" aria-controls="navegacion" aria-expanded="false" aria-label="Abrir menú">{{ ico('menu') }}</button>
       <nav id="navegacion" aria-label="Principal">
         <a href="#catalogo">Diplomados</a><a href="#cursos">Cursos</a><a href="#beca">Plan Alumni</a>
-        {% if not muestra %}<a id="abrir-acceso" href="{{ url_for('asesores.login') }}" aria-haspopup="dialog" aria-controls="acceso-modal">Asesores</a>{% endif %}
+        {% if not muestra %}
+        <div class="acceso-ancla">
+          <a id="abrir-acceso" href="{{ url_for('asesores.login') }}" aria-haspopup="dialog" aria-controls="acceso-popup" aria-expanded="false">Asesores</a>
+          <div id="acceso-popup" role="dialog" aria-labelledby="acceso-titulo" hidden>
+            <header><h2 id="acceso-titulo">Iniciar sesión</h2>
+              <button type="button" id="cerrar-acceso" aria-label="Cerrar acceso">{{ ico('close') }}</button></header>
+            {% include 'acceso_form.html' %}
+          </div>
+        </div>
+        {% endif %}
         <a class="button nav-contact" href="{{ whatsapp_url(telefono) }}" target="_blank" rel="noopener">{{ ico('chat') }} WhatsApp{% if asesor %} · {{ asesor.nombre }}{% endif %}</a>
       </nav>
     </div>
@@ -98,15 +107,6 @@
   </main>
   <footer class="footer"><div class="wrap footer-inner"><span>© 2026 · Universidad Politécnica Internacional</span><a href="#inicio">{{ ico('up') }} Volver al inicio</a></div></footer>
 
-  {% if not muestra %}
-  <dialog id="acceso-modal" aria-labelledby="acceso-titulo">
-    <div class="dialog-head">
-      <p class="kicker">Acceso de asesores</p><h2 id="acceso-titulo">Iniciar sesión</h2>
-      <button class="icon-btn close" type="button" id="cerrar-acceso" aria-label="Cerrar">{{ ico('close') }}</button>
-    </div>
-    <div class="dialog-content">{% include 'acceso_form.html' %}</div>
-  </dialog>
-  {% endif %}
   <dialog id="consulta" aria-labelledby="dialog-title">
     <div class="dialog-head">
       <p class="kicker">Admisiones · UPI Alumni</p>

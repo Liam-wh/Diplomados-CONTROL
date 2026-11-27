@@ -21,7 +21,7 @@ function setMenu(open) {
 }
 menuButton.addEventListener('click', () => setMenu(!navigation.classList.contains('open')));
 navigation.addEventListener('click', event => {
-  if (event.target.closest('a')) setMenu(false);
+  if (!event.defaultPrevented && event.target.closest('a')) setMenu(false);
 });
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape' && navigation.classList.contains('open')) {
